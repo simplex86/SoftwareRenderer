@@ -114,20 +114,9 @@ namespace SoftwareRenderer
 
         private void BuildMatrix()
         {
-            _modelToWorldMatrix = GetModelMatrix();
-            System.Console.WriteLine("model to world mat: \n" + _modelToWorldMatrix.ToString());
-            _worldToCameraMatrix = GetCameraMatrix();
-            System.Console.WriteLine("world to camera mat: \n" + _worldToCameraMatrix.ToString());
-            _projectionMatrix = GetPerspectiveMatrix();
-            System.Console.WriteLine("camera to clip mat: \n" + _projectionMatrix.ToString());
-
             _dirty = false;
-        }
-
-        Matrix GetModelMatrix()
-        {
-            Matrix matrix = Matrix.identity; ;
-            return matrix;
+            _worldToCameraMatrix = GetCameraMatrix();
+            _projectionMatrix = GetPerspectiveMatrix();
         }
 
         Matrix GetCameraMatrix()
@@ -157,7 +146,7 @@ namespace SoftwareRenderer
             m[0, 0] = fax / aspect;
             m[1, 1] = fax;
             m[2, 2] = far / (far - near);
-            m[3, 2] = -(near * far) / (far - near);
+            m[3, 2] = (near * far) / (near - far);
             m[2, 3] = 1.0f;
 
             return m;
@@ -167,6 +156,8 @@ namespace SoftwareRenderer
         {
             if (mesh == null)
                 return;
+
+            _modelToWorldMatrix = mesh.modelToWorldMatrix;
 
             List<Vector> vertics = mesh.vertics;
             List<Triangle> triangles = mesh.triangles;

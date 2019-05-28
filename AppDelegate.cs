@@ -14,6 +14,7 @@ namespace SoftwareRenderer
         private float _fps = 30.0f;
         private Font _font = new Font("Courier New", 12);
         private List<Mesh> _meshes = new List<Mesh>();
+        private float _meshRotationUp = 0;
         
         public AppDelegate()
         {
@@ -64,11 +65,19 @@ namespace SoftwareRenderer
         {
             if (e.KeyCode == Keys.Left)//左转
             {
-
+                _meshRotationUp -= 0.1f;
+                foreach (Mesh mesh in _meshes)
+                {
+                    mesh.rotation = new Vector(0, 0, _meshRotationUp);
+                }
             }
             else if (e.KeyCode == Keys.Right)//右转
             {
-
+                _meshRotationUp += 0.1f;
+                foreach (Mesh mesh in _meshes)
+                {
+                    mesh.rotation = new Vector(0, 0, _meshRotationUp);
+                }
             }
             else if (e.KeyCode == Keys.Up)//拉近
             {
