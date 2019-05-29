@@ -61,6 +61,15 @@ namespace SoftwareRenderer
             z *= factor;
         }
 
+        public void DivW()
+        {
+            if (Math.Abs(w) > float.Epsilon)
+            {
+                Scale(1.0f / w);
+                w = 1.0f;
+            }
+        }
+
         public static Vector zero
         {
             get { return new Vector(0, 0, 0); }
@@ -83,7 +92,7 @@ namespace SoftwareRenderer
 
         public static Vector forward
         {
-            get { return new Vector(1, 0, 0, 0); }
+            get { return new Vector(-1, 0, 0, 0); }
         }
 
         public static Vector operator +(Vector a, Vector b)

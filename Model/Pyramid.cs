@@ -30,12 +30,12 @@ namespace SoftwareRenderer
 
             List<Triangle> triangles = _mesh.triangles;
             //顺时针方向构造三角形
-            triangles.Add(new Triangle(idx0, idx2, idx1));
-            triangles.Add(new Triangle(idx0, idx3, idx2));
-            triangles.Add(new Triangle(idx0, idx4, idx3));
-            triangles.Add(new Triangle(idx0, idx1, idx4));
-            triangles.Add(new Triangle(idx1, idx2, idx3));
-            triangles.Add(new Triangle(idx3, idx4, idx1));
+            triangles.Add(new Triangle(idx0, idx1, idx2));
+            triangles.Add(new Triangle(idx0, idx2, idx3));
+            triangles.Add(new Triangle(idx0, idx3, idx4));
+            triangles.Add(new Triangle(idx0, idx4, idx1));
+            triangles.Add(new Triangle(idx3, idx2, idx1));
+            triangles.Add(new Triangle(idx1, idx4, idx3));
         }
 
         public Mesh mesh

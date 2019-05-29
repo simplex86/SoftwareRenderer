@@ -32,6 +32,7 @@ namespace SoftwareRenderer
             _camera.position = new Vector(_cameraPosX, 0, 0);
             _camera.fov = 90;
             _camera.LookAt(new Vector(-1.0f, 0.0f, 1.0f), Vector.up);
+            _camera.renderType = Camera.RenderType.COLOR;
 
             IModel model = new Pyramid();
             _meshes.Add(model.mesh);

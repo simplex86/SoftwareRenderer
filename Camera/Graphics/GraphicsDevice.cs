@@ -18,12 +18,15 @@ namespace SoftwareRenderer
 
         public abstract void DrawLine(Vector a, Vector b, Color color);
 
-        public abstract void DrawTriangle(Vector a, Vector b, Vector c, Color color);
+        public void DrawString(string text, Font font, Brush brush, float x = 0, float y = 0)
+        {
+            _graphics.DrawString(text, font, brush, x, y);
+        }
 
-        public abstract void DrawString(string str, Font font, Brush brush, float x = 0, float y = 0);
-
-        public abstract void Draw(Graphics graphics, float x = 0, float y = 0);
-
+        public void Draw(Graphics grap, float x = 0, float y = 0)
+        {
+            grap.DrawImage(_bitmap, x, y);
+        }
         public void Clear(Color color)
         {
             _graphics.Clear(color);

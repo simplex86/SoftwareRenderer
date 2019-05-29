@@ -10,8 +10,8 @@ namespace SoftwareRenderer
 
         public CameraBuffer(int width, int height)
         {
-            foreground = new GraphicsGDI(width, height);
-            background = new GraphicsGDI(width, height);
+            foreground = new GraphicsIMP(width, height);
+            background = new GraphicsIMP(width, height);
         }
 
         public void Swap()

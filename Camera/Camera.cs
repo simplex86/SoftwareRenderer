@@ -6,6 +6,12 @@ namespace SoftwareRenderer
 {
     class Camera
     {
+        public enum RenderType
+        {
+            WIREFRAME,
+            COLOR,
+        }
+
         private Vector _position = Vector.zero;
         private Vector _direction = Vector.forward;
         private Vector _up = Vector.up;
@@ -15,10 +21,12 @@ namespace SoftwareRenderer
         private bool _dirty = false;
         private CameraBuffer _gbuffer = new CameraBuffer(Screen.WIDTH, Screen.HEIGHT);
         private Vector _offset;
-        private Matrix _modelToWorldMatrix;
         private Matrix _worldToCameraMatrix;
         private Matrix _projectionMatrix;
+        private Rasterizer _raster = new Rasterizer();
+        private float[] _depthBuffer = new float[Screen.WIDTH * Screen.HEIGHT];
 
+        public RenderType renderType { get; set; }
         public event Action<GraphicsDevice> OnPostRender;
 
         private const float DEG_TO_RAD = (float)Math.PI / 180.0f;//角度转弧度
@@ -28,6 +36,11 @@ namespace SoftwareRenderer
             aspect = Screen.WIDTH / (float)Screen.HEIGHT;
             _offset = new Vector(Screen.WIDTH * 0.5f, Screen.HEIGHT * 0.5f, 0);
             _dirty = true;
+
+            for (int i = 0; i < _depthBuffer.Length; i++)
+            {
+                _depthBuffer[i] = float.MinValue;
+            }
         }
 
         public void LookAt(Vector target, Vector up)
@@ -157,46 +170,49 @@ namespace SoftwareRenderer
             if (mesh == null)
                 return;
 
-            _modelToWorldMatrix = mesh.modelToWorldMatrix;
-
-            List<Vector> vertics = mesh.vertics;
-            List<Triangle> triangles = mesh.triangles;
-            List<UV> uvs = mesh.uvs;
-
-            for (int i = 0; i < triangles.Count; i++)
+            Matrix mvp = mesh.modelToWorldMatrix * _worldToCameraMatrix * _projectionMatrix;
+            foreach (Triangle t in mesh.triangles)
             {
-                Triangle t = triangles[i];
+                //if (CullBackface(mesh, t))
+                //    continue;
 
-                Vertex a = new Vertex();
-                a.position = vertics[t.a.vertex];
-                a.uv = uvs[t.a.uv];
-
-                Vertex b = new Vertex();
-                b.position = vertics[t.b.vertex];
-                b.uv = uvs[t.b.uv];
-
-                Vertex c = new Vertex();
-                c.position = vertics[t.c.vertex];
-                c.uv = uvs[t.c.uv];
-
-                DrawPrimitive(a, b, c);
+                DrawPrimitive(mesh, t, mvp);
             }
         }
 
-        private void DrawPrimitive(Vertex v1, Vertex v2, Vertex v3)
+        private bool CullBackface(Mesh mesh, Triangle triangle)
         {
-            Matrix mvp = _modelToWorldMatrix * _worldToCameraMatrix * _projectionMatrix;
+            Vector a = mesh.vertics[triangle.a.vertex] * mesh.modelToWorldMatrix;
+            Vector b = mesh.vertics[triangle.b.vertex] * mesh.modelToWorldMatrix;
+            Vector c = mesh.vertics[triangle.c.vertex] * mesh.modelToWorldMatrix;
 
-            Vector clip1 = v1.position * mvp;
-            Vector clip2 = v2.position * mvp;
-            Vector clip3 = v3.position * mvp;
+            Vector d = _direction;
+            Vector n = Vector.Cross(b - a, c - a);
 
-            clip1.Scale(1.0f / clip1.w);
-            clip1.w = 1.0f;
-            clip2.Scale(1.0f / clip2.w);
-            clip2.w = 1.0f;
-            clip3.Scale(1.0f / clip3.w);
-            clip3.w = 1.0f;
+            return Vector.Dot(n, d) >= 0.0f;
+        }
+
+        private void DrawPrimitive(Mesh mesh, Triangle triangle, Matrix mvp)
+        {
+            Vertex a = new Vertex();
+            a.position = mesh.vertics[triangle.a.vertex];
+            a.uv = mesh.uvs[triangle.a.uv];
+
+            Vertex b = new Vertex();
+            b.position = mesh.vertics[triangle.b.vertex];
+            b.uv = mesh.uvs[triangle.b.uv];
+
+            Vertex c = new Vertex();
+            c.position = mesh.vertics[triangle.c.vertex];
+            c.uv = mesh.uvs[triangle.c.uv];
+
+            Vector clip1 = a.position * mvp;
+            Vector clip2 = b.position * mvp;
+            Vector clip3 = c.position * mvp;
+
+            clip1.DivW();
+            clip2.DivW();
+            clip3.DivW();
 
             float w = Screen.WIDTH * 0.5f;
             float h = Screen.HEIGHT * 0.5f;
@@ -205,7 +221,44 @@ namespace SoftwareRenderer
             Vector scr2 = new Vector(w * clip2.x + w, h - h * clip2.y, clip2.z);
             Vector scr3 = new Vector(w * clip3.x + w, h - h * clip3.y, clip3.z);
 
-            _gbuffer.foreground.DrawTriangle(scr1, scr2, scr3, Color.DarkBlue);
+            if (renderType == RenderType.WIREFRAME)
+            {
+                _gbuffer.foreground.DrawLine(scr1, scr2, Color.Black);
+                _gbuffer.foreground.DrawLine(scr2, scr3, Color.Black);
+                _gbuffer.foreground.DrawLine(scr3, scr1, Color.Black);
+            }
+            else if (renderType == RenderType.COLOR)
+            {
+                _raster.Do(scr1,    scr2,    scr3,
+                           a.color, b.color, c.color,
+                           a.uv,    b.uv,    c.uv);
+
+                foreach (Fragment fg in _raster.fragments)
+                {
+                    if (fg.depth > _depthBuffer[fg.y * Screen.WIDTH + fg.x])
+                    {
+                        _depthBuffer[fg.y * Screen.WIDTH + fg.x] = fg.depth;
+                    }
+                }
+
+                foreach (Fragment fg in _raster.fragments)
+                {
+                    if (Math.Abs(fg.depth - _depthBuffer[fg.y * Screen.WIDTH + fg.x]) < float.Epsilon)
+                    {
+                        _gbuffer.foreground.DrawPoint(new Vector(fg.x, fg.y, fg.depth, 0), Color.DarkBlue);
+                    }
+                }
+
+                ClearDepthBuffer();
+            }
+        }
+
+        private void ClearDepthBuffer()
+        {
+            for(int i=0; i<_depthBuffer.Length; i++)
+            {
+                _depthBuffer[i] = float.MinValue;
+            }
         }
     }
 }
