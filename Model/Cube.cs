@@ -3,13 +3,11 @@ using System.Collections.Generic;
 
 namespace SoftwareRenderer
 {
-    class Cube : IModel
+    class Cube : Model
     {
-        private Mesh _mesh = new Mesh();
-
         public Cube()
         {
-            List<Vector> vertics = _mesh.vertics;
+            List<Vector> vertics = mesh.vertics;
             vertics.Add(new Vector(-1, -1, 1));
             vertics.Add(new Vector(1, -1, 1));
             vertics.Add(new Vector(1, 1, 1));
@@ -19,7 +17,7 @@ namespace SoftwareRenderer
             vertics.Add(new Vector(1, 1, -1));
             vertics.Add(new Vector(-1, 1, -1));
 
-            List<UV> uvs = _mesh.uvs;
+            List<UV> uvs = mesh.uvs;
             uvs.Add(new UV(0, 0));
             uvs.Add(new UV(1, 0));
             uvs.Add(new UV(1, 1));
@@ -34,7 +32,7 @@ namespace SoftwareRenderer
             Triangle.Index idx6 = new Triangle.Index(6, 3);
             Triangle.Index idx7 = new Triangle.Index(7, 2);
             //顺时针方向构造三角形
-            List<Triangle> triangles = _mesh.triangles;
+            List<Triangle> triangles = mesh.triangles;
             //前
             triangles.Add(new Triangle(idx0, idx1, idx2));
             triangles.Add(new Triangle(idx2, idx3, idx0));
@@ -53,11 +51,6 @@ namespace SoftwareRenderer
             //左
             triangles.Add(new Triangle(idx3, idx7, idx4));
             triangles.Add(new Triangle(idx4, idx0, idx3));
-        }
-
-        public Mesh mesh
-        {
-            get { return _mesh; }
         }
     }
 }

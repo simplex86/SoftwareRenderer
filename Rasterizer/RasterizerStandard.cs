@@ -48,11 +48,11 @@ namespace SoftwareRenderer
             }
             else
             {
-                float pmz = 0;//TODO 插值得到
-                Vector pm = new Vector(pa.x + (pb.y - pa.y) / (pc.y - pa.y) * (pc.x - pa.x),
-                                       pb.y,
-                                       pmz, 
-                                       0);
+                float x = pa.x + (pb.y - pa.y) / (pc.y - pa.y) * (pc.x - pa.x);
+                float y = pb.y;
+                float z = LerpZ(pa.x, pc.x, x, 1 / pa.z, 1 / pb.z);
+                Vector pm = new Vector(x, y, 1 / z, 0);
+
                 Color cm = cc;//TODO 插值得到
                 UV um = uc;//TODO 插值得到
 
@@ -134,15 +134,10 @@ namespace SoftwareRenderer
             {
                 for (int y = (int)pc.y; y >= (int)pa.y; y--)
                 {
-                    for (int x = (int)x_ca; x <= (int)x_cb; x++)
-                    {
-                        Fragment fg = new Fragment();
-                        fg.x = x;
-                        fg.y = y;
-                        //TODO 还需要完成depth、color和uv的插值
+                    float sz = LerpZ(pc.y, pa.y, y, 1 / pc.z, 1 / pa.z);
+                    float ez = LerpZ(pc.y, pb.y, y, 1 / pc.z, 1 / pb.z);
 
-                        fragments.Add(fg);
-                    }
+                    ScanLine((int)x_ca, (int)x_cb, y, sz, ez);
                     x_ca -= invslope_ca;
                     x_cb -= invslope_cb;
                 }
@@ -151,15 +146,10 @@ namespace SoftwareRenderer
             {
                 for (int y = (int)pc.y; y >= (int)pa.y; y--)
                 {
-                    for (int x = (int)x_cb; x <= (int)x_ca; x++)
-                    {
-                        Fragment fg = new Fragment();
-                        fg.x = x;
-                        fg.y = y;
-                        //TODO 还需要完成depth、color和uv的插值
+                    float sz = LerpZ(pc.y, pb.y, y, 1 / pc.z, 1 / pb.z);
+                    float ez = LerpZ(pc.y, pa.y, y, 1 / pc.z, 1 / pa.z);
 
-                        fragments.Add(fg);
-                    }
+                    ScanLine((int)x_cb, (int)x_ca, y, sz, ez);
                     x_ca -= invslope_ca;
                     x_cb -= invslope_cb;
                 }
@@ -180,15 +170,10 @@ namespace SoftwareRenderer
             {
                 for (int y = (int)pa.y; y <= (int)pb.y; y++)
                 {
-                    for (int x = (int)x_ab; x <= (int)x_ac; x++)
-                    {
-                        Fragment fg = new Fragment();
-                        fg.x = x;
-                        fg.y = y;
-                        //TODO 还需要完成depth、color和uv的插值
+                    float sz = LerpZ(pa.y, pb.y, y, 1 / pa.z, 1 / pb.z);
+                    float ez = LerpZ(pa.y, pc.y, y, 1 / pa.z, 1 / pc.z);
 
-                        fragments.Add(fg);
-                    }
+                    ScanLine((int)x_ab, (int)x_ac, y, sz, ez);
                     x_ab += invslope_ab;
                     x_ac += invslope_ac;
                 }
@@ -197,18 +182,28 @@ namespace SoftwareRenderer
             {
                 for (int y = (int)pa.y; y <= (int)pb.y; y++)
                 {
-                    for (int x = (int)x_ac; x <= (int)x_ab; x++)
-                    {
-                        Fragment fg = new Fragment();
-                        fg.x = x;
-                        fg.y = y;
-                        //TODO 还需要完成depth、color和uv的插值
+                    float sz = LerpZ(pa.y, pc.y, y, 1 / pa.z, 1 / pc.z);
+                    float ez = LerpZ(pa.y, pb.y, y, 1 / pa.z, 1 / pb.z);
 
-                        fragments.Add(fg);
-                    }
+                    ScanLine((int)x_ac, (int)x_ab, y, sz, ez);
                     x_ab += invslope_ab;
                     x_ac += invslope_ac;
                 }
+            }
+        }
+
+        private void ScanLine(int sx, int ex, int y, float sz, float ez)
+        {
+            for (int x = sx; x <= ex; x++)
+            {
+                Fragment fg = new Fragment();
+                fg.x = x;
+                fg.y = y;
+                //TODO 还需要完成z和uv的插值
+                float iz = LerpZ(sx, ex, x, sz, ez);
+                fg.depth = 1 / iz;
+
+                fragments.Add(fg);
             }
         }
     }

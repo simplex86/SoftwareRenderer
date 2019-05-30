@@ -10,18 +10,20 @@ namespace SoftwareRenderer
     /// |    * *          |
     /// |   *   *         |
     /// |  *     *        |
-    /// |B*       *M      |
+    /// |B*       *       |
     /// |   *      *      |
     /// |     *     *     |
     /// |       *    *    |
     /// |         *   *   |
     /// |           *  *  |
     /// |             * * |
-    /// |             C  *|
+    /// |              C *|
     /// -------------------
+    /// 
     /// 参考文献：
     /// Barycentric Algorithm - http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html#algo3
-    /// 实践表明，实现简单但是性能很差！
+    /// 
+    /// 实践表明，实现简单但是性能很差！！！！！！！！！
     /// </summary>
     class RasterizerBarycentric : Rasterizer
     {
@@ -36,37 +38,29 @@ namespace SoftwareRenderer
             int top    = (int)Math.Min(pa.y, Math.Min(pb.y, pc.y));
             int bottom = (int)Math.Max(pa.y, Math.Max(pb.y, pc.y));
 
+            Vector ab = pb - pa;
+            Vector ac = pc - pa;
+
             for (int y = top; y < bottom; y++)
             {
                 for (int x = left; x < right; x++)
                 {
-                    Vector pp = new Vector(x, y, 0, 0);
+                    Vector pp = new Vector(x - pa.x, y - pa.y, 0, 0);
 
-                    if (InTriangle(ref pp, ref pa, ref pb, ref pc))
+                    float s = Vector.Cross(pp, ac).z / Vector.Cross(ab, ac).z;
+                    float t = Vector.Cross(ab, pp).z / Vector.Cross(ab, ac).z;
+
+                    if ((s >= 0) && (t >= 0) && (s + t <= 1))
                     {
                         Fragment fg = new Fragment();
                         fg.x = x;
                         fg.y = y;
-                        //TODO 还需要完成depth、color和uv的插值
+                        //TODO 还需要完成depth和uv的插值
 
                         fragments.Add(fg);
                     }
                 }
             }
-        }
-
-        private bool InTriangle(ref Vector p, ref Vector a, ref Vector b, ref Vector c)
-        {
-            Vector pa = a - p;
-            Vector pb = b - p;
-            Vector pc = c - p;
-
-            Vector t1 = Vector.Cross(pa, pb);
-            Vector t2 = Vector.Cross(pb, pc);
-            Vector t3 = Vector.Cross(pc, pa);
-
-            return (t1.z < 0 && t2.z < 0 && t3.z < 0) ||
-                   (t1.z > 0 && t2.z > 0 && t3.z > 0);
         }
     }
 }

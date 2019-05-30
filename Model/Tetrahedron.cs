@@ -3,19 +3,17 @@ using System.Collections.Generic;
 
 namespace SoftwareRenderer
 {
-    class Tetrahedron : IModel
+    class Tetrahedron : Model
     {
-        private Mesh _mesh = new Mesh();
-
         public Tetrahedron()
         {
-            List<Vector> vertics = _mesh.vertics;
+            List<Vector> vertics = mesh.vertics;
             vertics.Add(new Vector(0, 0, -1));
             vertics.Add(new Vector(1, -1, 1));
             vertics.Add(new Vector(1, 1, 1));
             vertics.Add(new Vector(-1, 0, 1));
 
-            List<UV> uvs = _mesh.uvs;
+            List<UV> uvs = mesh.uvs;
             uvs.Add(new UV(0, 0));
             uvs.Add(new UV(1, 0));
             uvs.Add(new UV(1, 1));
@@ -26,17 +24,12 @@ namespace SoftwareRenderer
             Triangle.Index idx2 = new Triangle.Index(2, 2);
             Triangle.Index idx3 = new Triangle.Index(3, 3);
 
-            List<Triangle> triangles = _mesh.triangles;
+            List<Triangle> triangles = mesh.triangles;
             //顺时针方向构造三角形
             triangles.Add(new Triangle(idx1, idx2, idx3));
             triangles.Add(new Triangle(idx3, idx2, idx0));
             triangles.Add(new Triangle(idx0, idx1, idx3));
             triangles.Add(new Triangle(idx0, idx1, idx2));
-        }
-
-        public Mesh mesh
-        {
-            get { return _mesh; }
         }
     }
 }

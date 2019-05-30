@@ -23,7 +23,7 @@ namespace SoftwareRenderer
         private Matrix _worldToCameraMatrix;
         private Matrix _projectionMatrix;
         private Rasterizer _raster = new RasterizerStandard();
-        private float[] _depthBuffer = new float[Screen.WIDTH * Screen.HEIGHT];
+        private float[] _zbuffer = new float[Screen.WIDTH * Screen.HEIGHT];
 
         private const float DEG_TO_RAD = (float)Math.PI / 180.0f;//角度转弧度
 
@@ -32,7 +32,7 @@ namespace SoftwareRenderer
             aspect = Screen.WIDTH / (float)Screen.HEIGHT;
             _dirty = true;
 
-            ClearDepthBuffer();
+            ClearZBuffer();
         }
 
         public void LookAt(Vector target, Vector up)
@@ -168,8 +168,8 @@ namespace SoftwareRenderer
             Matrix mvp = mesh.modelToWorldMatrix * _worldToCameraMatrix * _projectionMatrix;
             foreach (Triangle t in mesh.triangles)
             {
-                //if (CullBackface(mesh, t))
-                //    continue;
+                if (CullBackface(mesh, t))
+                    continue;
 
                 DrawPrimitive(mesh, t, mvp);
             }
@@ -228,23 +228,44 @@ namespace SoftwareRenderer
                            a.color, b.color, c.color,
                            a.uv,    b.uv,    c.uv);
 
+                WriteZBuffer(_raster.fragments);
+
                 foreach (Fragment fg in _raster.fragments)
                 {
-                    //if (Math.Abs(fg.depth - _depthBuffer[fg.y * Screen.WIDTH + fg.x]) < float.Epsilon)
+                    if (ZTest(fg.x, fg.y, fg.depth))
                     {
                         _gbuffer.foreground.DrawPoint(new Vector(fg.x, fg.y, fg.depth, 0), Color.DarkBlue);
                     }
                 }
 
-                ClearDepthBuffer();
+                ClearZBuffer();
             }
         }
 
-        private void ClearDepthBuffer()
+        private void WriteZBuffer(List<Fragment> fragments)
         {
-            for(int i=0; i<_depthBuffer.Length; i++)
+            foreach (Fragment fg in fragments)
             {
-                _depthBuffer[i] = float.MinValue;
+                int idx = fg.y * Screen.WIDTH + fg.y;
+
+                if (_zbuffer[idx] < fg.depth)
+                {
+                    _zbuffer[idx] = fg.depth;
+                }
+            }
+        }
+
+        private bool ZTest(int x, int y, float z)
+        {
+            int idx = y * Screen.WIDTH + x;
+            return z >= _zbuffer[idx];
+        }
+
+        private void ClearZBuffer()
+        {
+            for (int i = 0; i < _zbuffer.Length; i++)
+            {
+                _zbuffer[i] = float.MinValue;
             }
         }
     }

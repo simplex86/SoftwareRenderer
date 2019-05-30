@@ -56,7 +56,7 @@
     <Compile Include="Mesh\UV.cs" />
     <Compile Include="Mesh\Vertex.cs" />
     <Compile Include="Model\Cube.cs" />
-    <Compile Include="Model\IModel.cs" />
+    <Compile Include="Model\Model.cs" />
     <Compile Include="Model\Pyramid.cs" />
     <Compile Include="Model\Square.cs" />
     <Compile Include="Model\Tetrahedron.cs" />
