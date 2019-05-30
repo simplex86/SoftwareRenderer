@@ -135,7 +135,7 @@ namespace SoftwareRenderer
             return new Vector(x, y, z, w);
         }
 
-        public string ToString()
+        public new string ToString()
         {
             return string.Format("{0:F5}, {1:F5}, {2:F5}, {3:F5}", x, y, z, w);
         }

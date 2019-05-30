@@ -60,10 +60,14 @@
     <Compile Include="Model\Pyramid.cs" />
     <Compile Include="Model\Square.cs" />
     <Compile Include="Model\Tetrahedron.cs" />
+    <Compile Include="Model\TriangleM.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rasterizer\Fragment.cs" />
     <Compile Include="Rasterizer\Rasterizer.cs" />
+    <Compile Include="Rasterizer\RasterizerBarycentric.cs" />
+    <Compile Include="Rasterizer\RasterizerBresenham.cs" />
+    <Compile Include="Rasterizer\RasterizerStandard.cs" />
     <Compile Include="Screen.cs" />
   </ItemGroup>
   <ItemGroup>

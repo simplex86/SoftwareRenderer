@@ -20,27 +20,19 @@ namespace SoftwareRenderer
         private float _far = 100;
         private bool _dirty = false;
         private CameraBuffer _gbuffer = new CameraBuffer(Screen.WIDTH, Screen.HEIGHT);
-        private Vector _offset;
         private Matrix _worldToCameraMatrix;
         private Matrix _projectionMatrix;
-        private Rasterizer _raster = new Rasterizer();
+        private Rasterizer _raster = new RasterizerStandard();
         private float[] _depthBuffer = new float[Screen.WIDTH * Screen.HEIGHT];
-
-        public RenderType renderType { get; set; }
-        public event Action<GraphicsDevice> OnPostRender;
 
         private const float DEG_TO_RAD = (float)Math.PI / 180.0f;//角度转弧度
 
         public Camera()
         {
             aspect = Screen.WIDTH / (float)Screen.HEIGHT;
-            _offset = new Vector(Screen.WIDTH * 0.5f, Screen.HEIGHT * 0.5f, 0);
             _dirty = true;
 
-            for (int i = 0; i < _depthBuffer.Length; i++)
-            {
-                _depthBuffer[i] = float.MinValue;
-            }
+            ClearDepthBuffer();
         }
 
         public void LookAt(Vector target, Vector up)
@@ -124,6 +116,9 @@ namespace SoftwareRenderer
         }
 
         public float aspect { get; private set; }
+        public RenderType renderType { get; set; }
+
+        public event Action<GraphicsDevice> OnPostRender;
 
         private void BuildMatrix()
         {
@@ -132,7 +127,7 @@ namespace SoftwareRenderer
             _projectionMatrix = GetPerspectiveMatrix();
         }
 
-        Matrix GetCameraMatrix()
+        private Matrix GetCameraMatrix()
         {
             Vector cz = direction.Normalize();
             Vector cx = Vector.Cross(_up, cz).Normalize();
@@ -151,7 +146,7 @@ namespace SoftwareRenderer
             return matrix;
         }
 
-        Matrix GetPerspectiveMatrix()
+        private Matrix GetPerspectiveMatrix()
         {
             Matrix m = Matrix.zero;
             float fax = 1.0f / (float)Math.Tan(DEG_TO_RAD * _fov * 0.5f);
@@ -214,7 +209,7 @@ namespace SoftwareRenderer
             clip2.DivW();
             clip3.DivW();
 
-            float w = Screen.WIDTH * 0.5f;
+            float w = Screen.WIDTH  * 0.5f;
             float h = Screen.HEIGHT * 0.5f;
 
             Vector scr1 = new Vector(w * clip1.x + w, h - h * clip1.y, clip1.z);
@@ -235,15 +230,7 @@ namespace SoftwareRenderer
 
                 foreach (Fragment fg in _raster.fragments)
                 {
-                    if (fg.depth > _depthBuffer[fg.y * Screen.WIDTH + fg.x])
-                    {
-                        _depthBuffer[fg.y * Screen.WIDTH + fg.x] = fg.depth;
-                    }
-                }
-
-                foreach (Fragment fg in _raster.fragments)
-                {
-                    if (Math.Abs(fg.depth - _depthBuffer[fg.y * Screen.WIDTH + fg.x]) < float.Epsilon)
+                    //if (Math.Abs(fg.depth - _depthBuffer[fg.y * Screen.WIDTH + fg.x]) < float.Epsilon)
                     {
                         _gbuffer.foreground.DrawPoint(new Vector(fg.x, fg.y, fg.depth, 0), Color.DarkBlue);
                     }
