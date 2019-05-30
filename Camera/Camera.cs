@@ -25,8 +25,6 @@ namespace SoftwareRenderer
         private Rasterizer _raster = new RasterizerStandard();
         private float[] _zbuffer = new float[Screen.WIDTH * Screen.HEIGHT];
 
-        private const float DEG_TO_RAD = (float)Math.PI / 180.0f;//角度转弧度
-
         public Camera()
         {
             aspect = Screen.WIDTH / (float)Screen.HEIGHT;
@@ -129,8 +127,8 @@ namespace SoftwareRenderer
 
         private Matrix GetCameraMatrix()
         {
-            Vector cz = direction.Normalize();
-            Vector cx = Vector.Cross(_up, cz).Normalize();
+            Vector cz = Vector.Normalize(direction);
+            Vector cx = Vector.Normalize(Vector.Cross(_up, cz));
             Vector cy = Vector.Cross(cz, cx);
 
             float tx = -Vector.Dot(position, cx);
@@ -149,7 +147,7 @@ namespace SoftwareRenderer
         private Matrix GetPerspectiveMatrix()
         {
             Matrix m = Matrix.zero;
-            float fax = 1.0f / (float)Math.Tan(DEG_TO_RAD * _fov * 0.5f);
+            float fax = 1.0f / Mathf.Tan(Mathf.Deg2Rad(_fov * 0.5f));
 
             m[0, 0] = fax / aspect;
             m[1, 1] = fax;
@@ -246,7 +244,7 @@ namespace SoftwareRenderer
         {
             foreach (Fragment fg in fragments)
             {
-                int idx = fg.y * Screen.WIDTH + fg.y;
+                int idx = fg.y * Screen.WIDTH + fg.x;
 
                 if (_zbuffer[idx] < fg.depth)
                 {

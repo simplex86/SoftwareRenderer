@@ -34,13 +34,13 @@ namespace SoftwareRenderer
                  ref ca, ref cb, ref cc,
                  ref ua, ref ub, ref uc);
 
-            if (Math.Abs(pb.y - pc.y) <= float.Epsilon)
+            if (Mathf.Eq(pb.y, pc.y))
             {
                 RasterizeBottomTriangle(pa, pb, pc,
                                         ca, cb, cc,
                                         ua, ub, uc);
             }
-            else if (Math.Abs(pa.y - pb.y) <= float.Epsilon)
+            else if (Mathf.Eq(pa.y, pb.y))
             {
                 RasterizeTopTriangle(pa, pb, pc,
                                      ca, cb, cc,

@@ -11,7 +11,7 @@ namespace SoftwareRenderer
             : this()
         {
             _values = new float[VALUES_LENGTH];
-            int length = Math.Min(VALUES_LENGTH, values.Length);
+            int length = (int)Mathf.Min(VALUES_LENGTH, values.Length);
 
             for (int i = 0; i < length; i++)
             {
@@ -74,9 +74,9 @@ namespace SoftwareRenderer
 
         public static Matrix RotationX(float angle)
         {
-            float s = (float)Math.Sin(angle);
-            float c = (float)Math.Cos(angle);
-
+            float s = Mathf.Sin(angle);
+            float c = Mathf.Cos(angle);
+                          
             float[] values = new []{ 1, 0,  0, 0,
                                      0, c,  s, 0,
                                      0, -s, c, 0,
@@ -87,8 +87,8 @@ namespace SoftwareRenderer
 
         public static Matrix RotationY(float angle)
         {
-            float s = (float)Math.Sin(angle);
-            float c = (float)Math.Cos(angle);
+            float s = Mathf.Sin(angle);
+            float c = Mathf.Cos(angle);
 
             float[] values = new []{ c, 0, -s, 0,
                                      0, 1, 0,  0,
@@ -100,8 +100,8 @@ namespace SoftwareRenderer
 
         public static Matrix RotationZ(float angle)
         {
-            float s = (float)Math.Sin(angle);
-            float c = (float)Math.Cos(angle);
+            float s = Mathf.Sin(angle);
+            float c = Mathf.Cos(angle);
 
             float[] values = new []{ c,  s, 0, 0,
                                      -s, c, 0, 0,

@@ -33,10 +33,10 @@ namespace SoftwareRenderer
         {
             fragments.Clear();
 
-            int left   = (int)Math.Min(pa.x, Math.Min(pb.x, pc.x));
-            int right  = (int)Math.Max(pa.x, Math.Max(pb.x, pc.x));
-            int top    = (int)Math.Min(pa.y, Math.Min(pb.y, pc.y));
-            int bottom = (int)Math.Max(pa.y, Math.Max(pb.y, pc.y));
+            int left   = (int)Mathf.Min(pa.x, pb.x, pc.x);
+            int right  = (int)Mathf.Max(pa.x, pb.x, pc.x);
+            int top    = (int)Mathf.Min(pa.y, pb.y, pc.y);
+            int bottom = (int)Mathf.Max(pa.y, pb.y, pc.y);
 
             Vector ab = pb - pa;
             Vector ac = pc - pa;

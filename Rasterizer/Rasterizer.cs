@@ -19,11 +19,10 @@ namespace SoftwareRenderer
 
         protected float LerpZ(float s, float e, float x, float sz, float ez)
         {
-            if (Math.Abs(e - s) < float.Epsilon)
+            if (Mathf.Eq(e, s))
                 return sz;
 
-            float t = (x - s) / (e - s);
-            return sz + (ez - sz) * t;
+            return Mathf.Lerp(sz, ez, (x - s) / (e - s));
         }
     }
 }

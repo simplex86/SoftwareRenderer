@@ -29,7 +29,7 @@ namespace SoftwareRenderer
 
         public float length
         {
-            get { return (float)Math.Sqrt(x * x + y * y + z * z); }
+            get { return Mathf.Sqrt(x * x + y * y + z * z); }
         }
 
         public static float Dot(Vector a, Vector b)
@@ -44,28 +44,23 @@ namespace SoftwareRenderer
                               a.x * b.y - a.y * b.x);
         }
 
-        public Vector Normalize()
+        public static Vector Normalize(Vector v)
         {
-            float lenght = this.length;
-            float factor = (length < float.Epsilon) ? 0.0f : 1.0f / length;
+            float length = v.length;
+            float factor = Mathf.Eq(length, 0.0f) ? 0.0f : 1.0f / length;
 
-            return new Vector(this.x * factor,
-                              this.y * factor,
-                              this.z * factor);
-        }
-
-        public void Scale(float factor)
-        {
-            x *= factor;
-            y *= factor;
-            z *= factor;
+            return new Vector(v.x * factor,
+                              v.y * factor,
+                              v.z * factor);
         }
 
         public void DivW()
         {
-            if (Math.Abs(w) > float.Epsilon)
+            if (!Mathf.Eq(w, 0.0f))
             {
-                Scale(1.0f / w);
+                x /= w;
+                y /= w;
+                z /= w;
                 w = 1.0f;
             }
         }
@@ -112,7 +107,7 @@ namespace SoftwareRenderer
 
         public static Vector operator /(Vector v, float factor)
         {
-            if (Math.Abs(factor) < float.Epsilon)
+            if (Mathf.Eq(factor, 0.0f))
             {
                 return Vector.zero;
             }
