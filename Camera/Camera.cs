@@ -22,7 +22,9 @@ namespace SoftwareRenderer
         private CameraBuffer _gbuffer = new CameraBuffer(Screen.WIDTH, Screen.HEIGHT);
         private Matrix _worldToCameraMatrix;
         private Matrix _projectionMatrix;
-        private Rasterizer _raster = new RasterizerStandard();
+        private VertexShader _vertexShader = new VertexShader();
+        private Rasterizer _raster = new TriangleStandardRasterizer();
+        private FragmentShader _fragmentShader = new FragmentShader();
         private float[] _zbuffer = new float[Screen.WIDTH * Screen.HEIGHT];
 
         public Camera()
@@ -199,9 +201,13 @@ namespace SoftwareRenderer
             c.position = mesh.vertics[triangle.c.vertex];
             c.uv = mesh.uvs[triangle.c.uv];
 
-            Vector clip1 = a.position * mvp;
-            Vector clip2 = b.position * mvp;
-            Vector clip3 = c.position * mvp;
+            a = _vertexShader.Do(a, mvp);
+            b = _vertexShader.Do(b, mvp);
+            c = _vertexShader.Do(c, mvp);
+
+            Vector clip1 = a.position;
+            Vector clip2 = b.position;
+            Vector clip3 = c.position;
 
             clip1.DivW();
             clip2.DivW();
@@ -228,8 +234,9 @@ namespace SoftwareRenderer
 
                 WriteZBuffer(_raster.fragments);
 
-                foreach (Fragment fg in _raster.fragments)
+                foreach (Fragment fragment in _raster.fragments)
                 {
+                    Fragment fg = _fragmentShader.Do(fragment);
                     if (ZTest(fg.x, fg.y, fg.depth))
                     {
                         _gbuffer.foreground.DrawPoint(new Vector(fg.x, fg.y, fg.depth, 0), Color.DarkBlue);

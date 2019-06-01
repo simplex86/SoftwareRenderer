@@ -8,9 +8,9 @@ namespace SoftwareRenderer
     {
         private List<Fragment> _fragments = new List<Fragment>();
 
-        public abstract void Do(Vector pa, Vector pb, Vector pc,
-                                Color  ca, Color  cb, Color  cc,
-                                UV     ua, UV     ub, UV     uc);
+        public abstract void Do(Vector   pa, Vector   pb, Vector   pc,
+                                Color    ca, Color    cb, Color    cc,
+                                TexCoord ua, TexCoord ub, TexCoord uc);
 
         public List<Fragment> fragments
         {

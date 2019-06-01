@@ -15,11 +15,11 @@ namespace SoftwareRenderer
             vertics.Add(new Vector(1, 1, 1));
             vertics.Add(new Vector(1, -1, 1));
 
-            List<UV> uvs = mesh.uvs;
-            uvs.Add(new UV(0, 0));
-            uvs.Add(new UV(1, 0));
-            uvs.Add(new UV(1, 1));
-            uvs.Add(new UV(0, 1));
+            List<TexCoord> uvs = mesh.uvs;
+            uvs.Add(new TexCoord(0, 0));
+            uvs.Add(new TexCoord(1, 0));
+            uvs.Add(new TexCoord(1, 1));
+            uvs.Add(new TexCoord(0, 1));
 
             Triangle.Index idx0 = new Triangle.Index(0, 0);
             Triangle.Index idx1 = new Triangle.Index(1, 0);

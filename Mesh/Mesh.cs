@@ -6,7 +6,7 @@ namespace SoftwareRenderer
     class Mesh
     {
         public List<Vector> vertics { get; set; }
-        public List<UV> uvs { get; set; }
+        public List<TexCoord> uvs { get; set; }
         public List<Triangle> triangles { get; set; }
 
         private Vector _position = Vector.zero;
@@ -19,7 +19,7 @@ namespace SoftwareRenderer
         public Mesh()
         {
             vertics = new List<Vector>();
-            uvs = new List<UV>();
+            uvs = new List<TexCoord>();
             triangles = new List<Triangle>();
         }
 

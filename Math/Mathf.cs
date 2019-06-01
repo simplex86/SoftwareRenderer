@@ -61,8 +61,22 @@ namespace SoftwareRenderer
             return DEG_TO_RAD * d;
         }
 
+        public static float Clamp(float a, float min, float max)
+        {
+            if (a < min) return min;
+            if (a > max) return max;
+
+            return a;
+        }
+
+        public static float Clamp01(float a)
+        {
+            return Clamp(a, 0, 1);
+        }
+
         public static float Lerp(float a, float b, float t)
         {
+            t = Clamp01(t);
             return a + (b - a) * t;
         }
     }

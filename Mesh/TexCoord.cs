@@ -1,13 +1,11 @@
-﻿using System;
-
-namespace SoftwareRenderer
+﻿namespace SoftwareRenderer
 {
-    struct UV
+    struct TexCoord
     {
         public float u;
         public float v;
 
-        public UV(float u, float v)
+        public TexCoord(float u, float v)
             : this()
         {
             this.u = u;

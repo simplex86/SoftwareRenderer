@@ -22,11 +22,11 @@ namespace SoftwareRenderer
     /// 参考文献：
     /// Standard Algorithm - http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html#algo1
     /// </summary>
-    class RasterizerStandard : Rasterizer
+    class TriangleStandardRasterizer : Rasterizer
     {
-        public override void Do(Vector pa, Vector pb, Vector pc,
-                                Color  ca, Color  cb, Color  cc,
-                                UV     ua, UV     ub, UV     uc)
+        public override void Do(Vector   pa, Vector   pb, Vector   pc,
+                                Color    ca, Color    cb, Color    cc,
+                                TexCoord ua, TexCoord ub, TexCoord uc)
         {
             fragments.Clear();
 
@@ -54,7 +54,7 @@ namespace SoftwareRenderer
                 Vector pm = new Vector(x, y, 1 / z, 0);
 
                 Color cm = cc;//TODO 插值得到
-                UV um = uc;//TODO 插值得到
+                TexCoord um = uc;//TODO 插值得到
 
                 RasterizeBottomTriangle(pa, pb, pm,
                                         ca, cb, cm,
@@ -66,13 +66,13 @@ namespace SoftwareRenderer
             }
         }
 
-        private void Sort(ref Vector pa, ref Vector pb, ref Vector pc,
-                          ref Color  ca, ref Color  cb, ref Color  cc,
-                          ref UV     ua, ref UV     ub, ref UV     uc)
+        private void Sort(ref Vector   pa, ref Vector   pb, ref Vector   pc,
+                          ref Color    ca, ref Color    cb, ref Color    cc,
+                          ref TexCoord ua, ref TexCoord ub, ref TexCoord uc)
         {
-            Vector pt;
-            Color  ct;
-            UV     ut;
+            Vector   pt;
+            Color    ct;
+            TexCoord ut;
 
             if (pa.y > pb.y)
             {
@@ -120,9 +120,9 @@ namespace SoftwareRenderer
             }
         }
 
-        private void RasterizeTopTriangle(Vector pa, Vector pb, Vector pc,
-                                          Color  ca, Color  cb, Color  cc,
-                                          UV     ua, UV     ub, UV     uc)
+        private void RasterizeTopTriangle(Vector   pa, Vector   pb, Vector   pc,
+                                          Color    ca, Color    cb, Color    cc,
+                                          TexCoord ua, TexCoord ub, TexCoord uc)
         {
             float invslope_ca = (pc.x - pa.x) / (pc.y - pa.y);
             float invslope_cb = (pc.x - pb.x) / (pc.y - pb.y);
@@ -156,9 +156,9 @@ namespace SoftwareRenderer
             }
         }
 
-        private void RasterizeBottomTriangle(Vector pa, Vector pb, Vector pc,
-                                             Color  ca, Color  cb, Color  cc,
-                                             UV     ua, UV     ub, UV     uc)
+        private void RasterizeBottomTriangle(Vector   pa, Vector   pb, Vector   pc,
+                                             Color    ca, Color    cb, Color    cc,
+                                             TexCoord ua, TexCoord ub, TexCoord uc)
         {
             float invslope_ab = (pa.x - pb.x) / (pa.y - pb.y);
             float invslope_ac = (pa.x - pc.x) / (pa.y - pc.y);

@@ -8,6 +8,6 @@ namespace SoftwareRenderer
         public int y;
         public float depth;
         public Color color;
-        public UV uv;
+        public TexCoord uv;
     }
 }

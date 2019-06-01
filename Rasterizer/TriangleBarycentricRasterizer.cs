@@ -25,11 +25,11 @@ namespace SoftwareRenderer
     /// 
     /// 实践表明，实现简单但是性能很差！！！！！！！！！
     /// </summary>
-    class RasterizerBarycentric : Rasterizer
+    class TriangleBarycentricRasterizer : Rasterizer
     {
-        public override void Do(Vector pa, Vector pb, Vector pc,
-                                Color  ca, Color  cb, Color  cc,
-                                UV     ua, UV     ub, UV     uc)
+        public override void Do(Vector   pa, Vector   pb, Vector   pc,
+                                Color    ca, Color    cb, Color    cc,
+                                TexCoord ua, TexCoord ub, TexCoord uc)
         {
             fragments.Clear();
 
