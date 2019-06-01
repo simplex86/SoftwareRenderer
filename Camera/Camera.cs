@@ -166,83 +166,79 @@ namespace SoftwareRenderer
                 return;
 
             Matrix mvp = mesh.modelToWorldMatrix * _worldToCameraMatrix * _projectionMatrix;
-            foreach (Triangle t in mesh.triangles)
+            foreach (Triangle triangle in mesh.triangles)
             {
-                if (CullBackface(mesh, t))
+                Vertex a = GetVertex(mesh, triangle.a.vertex, triangle.a.uv);
+                Vertex b = GetVertex(mesh, triangle.b.vertex, triangle.b.uv);
+                Vertex c = GetVertex(mesh, triangle.c.vertex, triangle.c.uv);
+
+                //背面消除
+                if (CullBackface(a.position, b.position, c.position, mesh.modelToWorldMatrix))
                     continue;
 
-                DrawPrimitive(mesh, t, mvp);
-            }
-        }
+                a = _vertexShader.Do(a, mvp);
+                b = _vertexShader.Do(b, mvp);
+                c = _vertexShader.Do(c, mvp);
 
-        private bool CullBackface(Mesh mesh, Triangle triangle)
-        {
-            Vector a = mesh.vertics[triangle.a.vertex] * mesh.modelToWorldMatrix;
-            Vector b = mesh.vertics[triangle.b.vertex] * mesh.modelToWorldMatrix;
-            Vector c = mesh.vertics[triangle.c.vertex] * mesh.modelToWorldMatrix;
+                Vector clip1 = a.position;
+                Vector clip2 = b.position;
+                Vector clip3 = c.position;
+                //透视除法
+                clip1.DivW();
+                clip2.DivW();
+                clip3.DivW();
+                //屏幕映射
+                float w = Screen.WIDTH * 0.5f;
+                float h = Screen.HEIGHT * 0.5f;
+                a.position = new Vector(w * clip1.x + w, h - h * clip1.y, clip1.z);
+                b.position = new Vector(w * clip2.x + w, h - h * clip2.y, clip2.z);
+                c.position = new Vector(w * clip3.x + w, h - h * clip3.y, clip3.z);
 
-            Vector d = _direction;
-            Vector n = Vector.Cross(b - a, c - a);
-
-            return Vector.Dot(n, d) >= 0.0f;
-        }
-
-        private void DrawPrimitive(Mesh mesh, Triangle triangle, Matrix mvp)
-        {
-            Vertex a = GetVertex(mesh, triangle.a.vertex, triangle.a.uv);
-            Vertex b = GetVertex(mesh, triangle.b.vertex, triangle.b.uv);
-            Vertex c = GetVertex(mesh, triangle.c.vertex, triangle.c.uv);
-            
-            a = _vertexShader.Do(a, mvp);
-            b = _vertexShader.Do(b, mvp);
-            c = _vertexShader.Do(c, mvp);
-
-            Vector clip1 = a.position;
-            Vector clip2 = b.position;
-            Vector clip3 = c.position;
-            //透视除法
-            clip1.DivW();
-            clip2.DivW();
-            clip3.DivW();
-            //屏幕映射
-            float w = Screen.WIDTH  * 0.5f;
-            float h = Screen.HEIGHT * 0.5f;
-            a.position = new Vector(w * clip1.x + w, h - h * clip1.y, clip1.z);
-            b.position = new Vector(w * clip2.x + w, h - h * clip2.y, clip2.z);
-            c.position = new Vector(w * clip3.x + w, h - h * clip3.y, clip3.z);
-
-            if (renderType == RenderType.WIREFRAME)
-            {
-                _gbuffer.foreground.DrawLine(a.position, b.position, Color.Black);
-                _gbuffer.foreground.DrawLine(b.position, c.position, Color.Black);
-                _gbuffer.foreground.DrawLine(c.position, a.position, Color.Black);
-            }
-            else if (renderType == RenderType.COLOR)
-            {
-                _raster.Do(a, b, c);
-
-                WriteZBuffer(_raster.fragments);
-
-                foreach (Fragment fragment in _raster.fragments)
+                if (renderType == RenderType.WIREFRAME)
                 {
-                    Fragment fg = _fragmentShader.Do(fragment);
-                    if (ZTest(fg.x, fg.y, fg.depth))
-                    {
-                        _gbuffer.foreground.DrawPoint(new Vector(fg.x, fg.y, fg.depth, 0), Color.DarkBlue);
-                    }
+                    _gbuffer.foreground.DrawLine(a.position, b.position, Color.Black);
+                    _gbuffer.foreground.DrawLine(b.position, c.position, Color.Black);
+                    _gbuffer.foreground.DrawLine(c.position, a.position, Color.Black);
                 }
+                else if (renderType == RenderType.COLOR)
+                {
+                    _raster.Do(a, b, c);
 
-                ClearZBuffer();
+                    WriteZBuffer(_raster.fragments);
+
+                    foreach (Fragment fragment in _raster.fragments)
+                    {
+                        Fragment fg = _fragmentShader.Do(fragment);
+                        if (ZTest(fg.x, fg.y, fg.depth))
+                        {
+                            _gbuffer.foreground.DrawPoint(new Vector(fg.x, fg.y, fg.depth, 0), Color.DarkBlue);
+                        }
+                    }
+
+                    ClearZBuffer();
+                }
             }
         }
 
-        public Vertex GetVertex(Mesh mesh, int vertex, int uv)
+        private Vertex GetVertex(Mesh mesh, int vertex, int uv)
         {
             Vertex v = new Vertex();
             v.position = mesh.vertics[vertex];
             v.uv = mesh.uvs[uv];
 
             return v;
+        }
+
+        private bool CullBackface(Vector a, Vector b, Vector c, Matrix modelToWorldMatrix)
+        {
+            a *= modelToWorldMatrix;
+            b *= modelToWorldMatrix;
+            c *= modelToWorldMatrix;
+
+            Vector d = _direction;
+            Vector n = Vector.Cross(b - a, c - a);
+
+            return Vector.Dot(n, d) >= 0.0f;
         }
 
         private void WriteZBuffer(List<Fragment> fragments)
