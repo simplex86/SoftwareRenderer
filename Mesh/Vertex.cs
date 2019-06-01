@@ -2,18 +2,11 @@
 
 namespace SoftwareRenderer
 {
-    class Vertex
+    struct Vertex
     {
         public Vector position { get; set; }
         public Color color { get; set; }
         public TexCoord uv { get; set; }
-
-        public Vertex()
-        {
-            position = new Vector();
-            color = Color.White;
-            uv = new TexCoord(0, 0);
-        }
 
         public static Vertex Lerp(Vertex va, Vertex vb, float factor)
         {

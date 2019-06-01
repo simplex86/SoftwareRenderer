@@ -11,9 +11,7 @@ namespace SoftwareRenderer
     /// </summary>
     class TriangleBresenhamRasterizer : Rasterizer
     {
-        public override void Do(Vector   pa, Vector   pb, Vector   pc,
-                                Color    ca, Color    cb, Color    cc,
-                                TexCoord ua, TexCoord ub, TexCoord uc)
+        public override void Do(Vertex a, Vertex b, Vertex c)
         {
             //TODO 还没实现
         }

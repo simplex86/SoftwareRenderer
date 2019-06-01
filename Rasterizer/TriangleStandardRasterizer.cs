@@ -24,106 +24,97 @@ namespace SoftwareRenderer
     /// </summary>
     class TriangleStandardRasterizer : Rasterizer
     {
-        public override void Do(Vector   pa, Vector   pb, Vector   pc,
-                                Color    ca, Color    cb, Color    cc,
-                                TexCoord ua, TexCoord ub, TexCoord uc)
+        public override void Do(Vertex a, Vertex b, Vertex c)
         {
             fragments.Clear();
+            Sort(ref a, ref b, ref c);
 
-            Sort(ref pa, ref pb, ref pc,
-                 ref ca, ref cb, ref cc,
-                 ref ua, ref ub, ref uc);
-
-            if (Mathf.Eq(pb.y, pc.y))
+            if (Mathf.Eq(b.position.y, c.position.y))
             {
-                RasterizeBottomTriangle(pa, pb, pc,
-                                        ca, cb, cc,
-                                        ua, ub, uc);
+                RasterizeBottomTriangle(a, b, c);
             }
-            else if (Mathf.Eq(pa.y, pb.y))
+            else if (Mathf.Eq(a.position.y, b.position.y))
             {
-                RasterizeTopTriangle(pa, pb, pc,
-                                     ca, cb, cc,
-                                     ua, ub, uc);
+                RasterizeTopTriangle(a, b, c);
             }
             else
             {
+                Vector pa = a.position;
+                Vector pb = b.position;
+                Vector pc = c.position;
+
                 float x = pa.x + (pb.y - pa.y) / (pc.y - pa.y) * (pc.x - pa.x);
                 float y = pb.y;
                 float z = LerpZ(pa.x, pc.x, x, 1 / pa.z, 1 / pb.z);
-                Vector pm = new Vector(x, y, 1 / z, 0);
 
-                Color cm = cc;//TODO 插值得到
-                TexCoord um = uc;//TODO 插值得到
+                Vertex m = new Vertex();
+                m.position = new Vector(x, y, 1 / z, 0);
+                m.color = c.color;//TODO 插值得到
+                m.uv = c.uv;//TODO 插值得到
 
-                RasterizeBottomTriangle(pa, pb, pm,
-                                        ca, cb, cm,
-                                        ua, ub, um);
-
-                RasterizeTopTriangle(pb, pm, pc,
-                                     cb, cm, cc,
-                                     ub, um, uc);
+                RasterizeBottomTriangle(a, b, m);
+                RasterizeTopTriangle(b, m, c);
             }
         }
 
-        private void Sort(ref Vector   pa, ref Vector   pb, ref Vector   pc,
-                          ref Color    ca, ref Color    cb, ref Color    cc,
-                          ref TexCoord ua, ref TexCoord ub, ref TexCoord uc)
+        private void Sort(ref Vertex a, ref Vertex b, ref Vertex c)
         {
             Vector   pt;
             Color    ct;
             TexCoord ut;
 
-            if (pa.y > pb.y)
+            if (a.position.y > b.position.y)
             {
-                pt = pa;
-                pa = pb;
-                pb = pt;
+                pt = a.position;
+                a.position = b.position;
+                b.position = pt;
 
-                ct = ca;
-                ca = cb;
-                cb = ct;
+                ct = a.color;
+                a.color = b.color;
+                b.color = ct;
 
-                ut = ua;
-                ua = ub;
-                ub = ut;
+                ut = a.uv;
+                a.uv = b.uv;
+                b.uv = ut;
             }
 
-            if (pa.y > pc.y)
+            if (a.position.y > c.position.y)
             {
-                pt = pa;
-                pa = pc;
-                pc = pt;
+                pt = a.position;
+                a.position = c.position;
+                c.position = pt;
 
-                ct = ca;
-                ca = cc;
-                cc = ct;
+                ct = a.color;
+                a.color = c.color;
+                c.color = ct;
 
-                ut = ua;
-                ua = uc;
-                uc = ut;
+                ut = a.uv;
+                a.uv = c.uv;
+                c.uv = ut;
             }
 
-            if (pb.y > pc.y)
+            if (b.position.y > c.position.y)
             {
-                pt = pb;
-                pb = pc;
-                pc = pt;
+                pt = b.position;
+                b.position = c.position;
+                c.position = pt;
 
-                ct = cb;
-                cb = cc;
-                cc = ct;
+                ct = b.color;
+                b.color = c.color;
+                c.color = ct;
 
-                ut = ub;
-                ub = uc;
-                uc = ut;
+                ut = b.uv;
+                b.uv = c.uv;
+                c.uv = ut;
             }
         }
 
-        private void RasterizeTopTriangle(Vector   pa, Vector   pb, Vector   pc,
-                                          Color    ca, Color    cb, Color    cc,
-                                          TexCoord ua, TexCoord ub, TexCoord uc)
+        private void RasterizeTopTriangle(Vertex a, Vertex b, Vertex c)
         {
+            Vector pa = a.position;
+            Vector pb = b.position;
+            Vector pc = c.position;
+
             float invslope_ca = (pc.x - pa.x) / (pc.y - pa.y);
             float invslope_cb = (pc.x - pb.x) / (pc.y - pb.y);
 
@@ -156,10 +147,12 @@ namespace SoftwareRenderer
             }
         }
 
-        private void RasterizeBottomTriangle(Vector   pa, Vector   pb, Vector   pc,
-                                             Color    ca, Color    cb, Color    cc,
-                                             TexCoord ua, TexCoord ub, TexCoord uc)
+        private void RasterizeBottomTriangle(Vertex a, Vertex b, Vertex c)
         {
+            Vector pa = a.position;
+            Vector pb = b.position;
+            Vector pc = c.position;
+
             float invslope_ab = (pa.x - pb.x) / (pa.y - pb.y);
             float invslope_ac = (pa.x - pc.x) / (pa.y - pc.y);
 

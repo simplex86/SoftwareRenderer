@@ -189,18 +189,10 @@ namespace SoftwareRenderer
 
         private void DrawPrimitive(Mesh mesh, Triangle triangle, Matrix mvp)
         {
-            Vertex a = new Vertex();
-            a.position = mesh.vertics[triangle.a.vertex];
-            a.uv = mesh.uvs[triangle.a.uv];
-
-            Vertex b = new Vertex();
-            b.position = mesh.vertics[triangle.b.vertex];
-            b.uv = mesh.uvs[triangle.b.uv];
-
-            Vertex c = new Vertex();
-            c.position = mesh.vertics[triangle.c.vertex];
-            c.uv = mesh.uvs[triangle.c.uv];
-
+            Vertex a = GetVertex(mesh, triangle.a.vertex, triangle.a.uv);
+            Vertex b = GetVertex(mesh, triangle.b.vertex, triangle.b.uv);
+            Vertex c = GetVertex(mesh, triangle.c.vertex, triangle.c.uv);
+            
             a = _vertexShader.Do(a, mvp);
             b = _vertexShader.Do(b, mvp);
             c = _vertexShader.Do(c, mvp);
@@ -208,29 +200,26 @@ namespace SoftwareRenderer
             Vector clip1 = a.position;
             Vector clip2 = b.position;
             Vector clip3 = c.position;
-
+            //透视除法
             clip1.DivW();
             clip2.DivW();
             clip3.DivW();
-
+            //屏幕映射
             float w = Screen.WIDTH  * 0.5f;
             float h = Screen.HEIGHT * 0.5f;
-
-            Vector scr1 = new Vector(w * clip1.x + w, h - h * clip1.y, clip1.z);
-            Vector scr2 = new Vector(w * clip2.x + w, h - h * clip2.y, clip2.z);
-            Vector scr3 = new Vector(w * clip3.x + w, h - h * clip3.y, clip3.z);
+            a.position = new Vector(w * clip1.x + w, h - h * clip1.y, clip1.z);
+            b.position = new Vector(w * clip2.x + w, h - h * clip2.y, clip2.z);
+            c.position = new Vector(w * clip3.x + w, h - h * clip3.y, clip3.z);
 
             if (renderType == RenderType.WIREFRAME)
             {
-                _gbuffer.foreground.DrawLine(scr1, scr2, Color.Black);
-                _gbuffer.foreground.DrawLine(scr2, scr3, Color.Black);
-                _gbuffer.foreground.DrawLine(scr3, scr1, Color.Black);
+                _gbuffer.foreground.DrawLine(a.position, b.position, Color.Black);
+                _gbuffer.foreground.DrawLine(b.position, c.position, Color.Black);
+                _gbuffer.foreground.DrawLine(c.position, a.position, Color.Black);
             }
             else if (renderType == RenderType.COLOR)
             {
-                _raster.Do(scr1,    scr2,    scr3,
-                           a.color, b.color, c.color,
-                           a.uv,    b.uv,    c.uv);
+                _raster.Do(a, b, c);
 
                 WriteZBuffer(_raster.fragments);
 
@@ -245,6 +234,15 @@ namespace SoftwareRenderer
 
                 ClearZBuffer();
             }
+        }
+
+        public Vertex GetVertex(Mesh mesh, int vertex, int uv)
+        {
+            Vertex v = new Vertex();
+            v.position = mesh.vertics[vertex];
+            v.uv = mesh.uvs[uv];
+
+            return v;
         }
 
         private void WriteZBuffer(List<Fragment> fragments)

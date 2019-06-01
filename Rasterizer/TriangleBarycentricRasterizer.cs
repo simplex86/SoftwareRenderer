@@ -27,11 +27,13 @@ namespace SoftwareRenderer
     /// </summary>
     class TriangleBarycentricRasterizer : Rasterizer
     {
-        public override void Do(Vector   pa, Vector   pb, Vector   pc,
-                                Color    ca, Color    cb, Color    cc,
-                                TexCoord ua, TexCoord ub, TexCoord uc)
+        public override void Do(Vertex a, Vertex b, Vertex c)
         {
             fragments.Clear();
+
+            Vector pa = a.position;
+            Vector pb = b.position;
+            Vector pc = c.position;
 
             int left   = (int)Mathf.Min(pa.x, pb.x, pc.x);
             int right  = (int)Mathf.Max(pa.x, pb.x, pc.x);
