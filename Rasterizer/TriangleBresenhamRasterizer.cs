@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Drawing;
 
 namespace SoftwareRenderer
@@ -11,9 +11,11 @@ namespace SoftwareRenderer
     /// </summary>
     class TriangleBresenhamRasterizer : Rasterizer
     {
-        public override void Do(Vertex a, Vertex b, Vertex c)
+        public override List<Fragment> Do(Vertex a, Vertex b, Vertex c)
         {
+            _fragments.Clear();
             //TODO 还没实现
+            return _fragments;
         }
     }
 }

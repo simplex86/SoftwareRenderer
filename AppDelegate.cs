@@ -10,7 +10,7 @@ namespace SoftwareRenderer
     {
         private Form _form = null;
         private Camera _camera = new Camera();
-        private float _cameraPosX = 3;
+        private float _cameraPosForward = -3;
         private float _fps = 30.0f;
         private Font _font = new Font("Courier New", 12);
         private List<Mesh> _meshes = new List<Mesh>();
@@ -29,10 +29,10 @@ namespace SoftwareRenderer
 
         public void Run()
         {
-            _camera.position = new Vector(_cameraPosX, 0, 0);
+            _camera.position = new Vector(0, 0, _cameraPosForward);
             _camera.fov = 90;
-            _camera.LookAt(new Vector(-1.0f, 0.0f, 1.0f), Vector.up);
-            _camera.renderType = Camera.RenderType.COLOR;
+            _camera.LookAt(new Vector(0.0f, -0.5f, 0.2f), Vector.up);
+            _camera.renderType = Camera.RenderType.WIREFRAME;
 
             Model model = new Pyramid();
             _meshes.Add(model.mesh);
@@ -56,39 +56,41 @@ namespace SoftwareRenderer
             }
         }
 
-        void OnCameraPostRender(GraphicsDevice grap)
+        void OnCameraPostRender(CameraCanvas canvas)
         {
             //显示帧率
-            grap.DrawString(string.Format("FPS: {0}", _fps), _font, Brushes.Black);
+            canvas.DrawString(string.Format("FPS: {0}", _fps),
+                              _font,
+                              Brushes.Black);
         }
 
         void OnFormKeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Left)//左转
             {
-                _meshRotationUp -= 0.1f;
+                _meshRotationUp += 0.05f;
                 foreach (Mesh mesh in _meshes)
                 {
-                    mesh.rotation = new Vector(0, 0, _meshRotationUp);
+                    mesh.rotation = new Vector(0, _meshRotationUp, 0);
                 }
             }
             else if (e.KeyCode == Keys.Right)//右转
             {
-                _meshRotationUp += 0.1f;
+                _meshRotationUp -= 0.05f;
                 foreach (Mesh mesh in _meshes)
                 {
-                    mesh.rotation = new Vector(0, 0, _meshRotationUp);
+                    mesh.rotation = new Vector(0, _meshRotationUp, 0);
                 }
             }
             else if (e.KeyCode == Keys.Up)//拉近
             {
-                _cameraPosX -= 0.1f;
-                _camera.position = new Vector(_cameraPosX, 0, 0);
+                _cameraPosForward += 0.1f;
+                _camera.position = new Vector(0, 0, _cameraPosForward);
             }
             else if (e.KeyCode == Keys.Down)//推远
             {
-                _cameraPosX += 0.1f;
-                _camera.position = new Vector(_cameraPosX, 0, 0);
+                _cameraPosForward -= 0.1f;
+                _camera.position = new Vector(0, 0, _cameraPosForward);
             }
         }
     }

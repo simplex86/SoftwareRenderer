@@ -8,10 +8,10 @@ namespace SoftwareRenderer
         public Square()
         {
             List<Vector> vertics = mesh.vertics;
-            vertics.Add(new Vector(0, -1, -1));
-            vertics.Add(new Vector(0, 1, -1));
-            vertics.Add(new Vector(0, 1, 1));
-            vertics.Add(new Vector(0, -1, 1));
+            vertics.Add(new Vector(-1,  1, 0));
+            vertics.Add(new Vector( 1,  1, 0));
+            vertics.Add(new Vector( 1, -1, 0));
+            vertics.Add(new Vector(-1, -1, 0));
 
             List<TexCoord> uvs = mesh.uvs;
             uvs.Add(new TexCoord(0, 0));

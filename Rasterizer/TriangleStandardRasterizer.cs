@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace SoftwareRenderer
@@ -24,9 +25,9 @@ namespace SoftwareRenderer
     /// </summary>
     class TriangleStandardRasterizer : Rasterizer
     {
-        public override void Do(Vertex a, Vertex b, Vertex c)
+        public override List<Fragment> Do(Vertex a, Vertex b, Vertex c)
         {
-            fragments.Clear();
+            _fragments.Clear();
             Sort(ref a, ref b, ref c);
 
             if (Mathf.Eq(b.position.y, c.position.y))
@@ -55,6 +56,8 @@ namespace SoftwareRenderer
                 RasterizeBottomTriangle(a, b, m);
                 RasterizeTopTriangle(b, m, c);
             }
+
+            return _fragments;
         }
 
         private void Sort(ref Vertex a, ref Vertex b, ref Vertex c)
@@ -189,14 +192,10 @@ namespace SoftwareRenderer
         {
             for (int x = sx; x <= ex; x++)
             {
-                Fragment fg = new Fragment();
-                fg.x = x;
-                fg.y = y;
-                //TODO 还需要完成z和uv的插值
                 float iz = LerpZ(sx, ex, x, sz, ez);
-                fg.depth = 1 / iz;
-
-                fragments.Add(fg);
+                //TODO 还需要完成z和uv的插值
+                Fragment fg = new Fragment(x, y, 1 / iz);
+                _fragments.Add(fg);
             }
         }
     }

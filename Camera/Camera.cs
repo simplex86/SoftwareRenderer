@@ -18,12 +18,13 @@ namespace SoftwareRenderer
         private float _fov = 90.0f;
         private float _near = 0.1f;
         private float _far = 100;
+        private RenderType _renderType = RenderType.WIREFRAME;
         private bool _dirty = false;
         private CameraBuffer _gbuffer = new CameraBuffer(Screen.WIDTH, Screen.HEIGHT);
         private Matrix _worldToCameraMatrix;
         private Matrix _projectionMatrix;
         private VertexShader _vertexShader = new VertexShader();
-        private Rasterizer _raster = new TriangleStandardRasterizer();
+        private Rasterizer _raster = new WireframeBresenhamRasterizer();
         private FragmentShader _fragmentShader = new FragmentShader();
         private float[] _zbuffer = new float[Screen.WIDTH * Screen.HEIGHT];
 
@@ -62,7 +63,7 @@ namespace SoftwareRenderer
             }
 
             _gbuffer.Swap();
-            _gbuffer.background.Draw(grap);
+            _gbuffer.background.Flush(grap);
         }
 
         public Vector position
@@ -116,9 +117,28 @@ namespace SoftwareRenderer
         }
 
         public float aspect { get; private set; }
-        public RenderType renderType { get; set; }
+        public RenderType renderType 
+        { 
+            set
+            {
+                if (_renderType != value)
+                {
+                    _renderType = value;
 
-        public event Action<GraphicsDevice> OnPostRender;
+                    if (_renderType == RenderType.WIREFRAME)
+                    {
+                        _raster = new WireframeBresenhamRasterizer();
+                    }
+                    else if (_renderType == RenderType.COLOR)
+                    {
+                        _raster = new TriangleStandardRasterizer();
+                    }
+                }
+            }
+            get { return _renderType; }
+        }
+
+        public event Action<CameraCanvas> OnPostRender;
 
         private void BuildMatrix()
         {
@@ -172,7 +192,7 @@ namespace SoftwareRenderer
                 Vertex b = GetVertex(mesh, triangle.b.vertex, triangle.b.uv);
                 Vertex c = GetVertex(mesh, triangle.c.vertex, triangle.c.uv);
 
-                //背面消除
+                //背面剔除
                 if (CullBackface(a.position, b.position, c.position, mesh.modelToWorldMatrix))
                     continue;
 
@@ -180,33 +200,41 @@ namespace SoftwareRenderer
                 b = _vertexShader.Do(b, mvp);
                 c = _vertexShader.Do(c, mvp);
 
+                //裁剪
+                Clip(a, b, c);
+
+                //透视除法
                 Vector clip1 = a.position;
                 Vector clip2 = b.position;
                 Vector clip3 = c.position;
-                //透视除法
                 clip1.DivW();
                 clip2.DivW();
                 clip3.DivW();
+
                 //屏幕映射
-                float w = Screen.WIDTH * 0.5f;
+                float w = Screen.WIDTH  * 0.5f;
                 float h = Screen.HEIGHT * 0.5f;
                 a.position = new Vector(w * clip1.x + w, h - h * clip1.y, clip1.z);
                 b.position = new Vector(w * clip2.x + w, h - h * clip2.y, clip2.z);
                 c.position = new Vector(w * clip3.x + w, h - h * clip3.y, clip3.z);
 
+                //光栅化
+                List<Fragment> fragments = _raster.Do(a, b, c);
+
+                //渲染到屏幕
                 if (renderType == RenderType.WIREFRAME)
                 {
-                    _gbuffer.foreground.DrawLine(a.position, b.position, Color.Black);
-                    _gbuffer.foreground.DrawLine(b.position, c.position, Color.Black);
-                    _gbuffer.foreground.DrawLine(c.position, a.position, Color.Black);
+                    foreach (Fragment fragment in fragments)
+                    {
+                        Fragment fg = _fragmentShader.Do(fragment);
+                        _gbuffer.foreground.DrawPoint(new Vector(fg.x, fg.y, fg.depth, 0), Color.Black);
+                    }
                 }
                 else if (renderType == RenderType.COLOR)
                 {
-                    _raster.Do(a, b, c);
+                    WriteZBuffer(fragments);
 
-                    WriteZBuffer(_raster.fragments);
-
-                    foreach (Fragment fragment in _raster.fragments)
+                    foreach (Fragment fragment in fragments)
                     {
                         Fragment fg = _fragmentShader.Do(fragment);
                         if (ZTest(fg.x, fg.y, fg.depth))
@@ -239,6 +267,11 @@ namespace SoftwareRenderer
             Vector n = Vector.Cross(b - a, c - a);
 
             return Vector.Dot(n, d) >= 0.0f;
+        }
+
+        private void Clip(Vertex a, Vertex b, Vertex c)
+        {
+            //TODO 未实现
         }
 
         private void WriteZBuffer(List<Fragment> fragments)

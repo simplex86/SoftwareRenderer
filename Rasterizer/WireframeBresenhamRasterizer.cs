@@ -1,53 +1,61 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SoftwareRenderer
 {
-    class GraphicsIMP : GraphicsDevice
+    class WireframeBresenhamRasterizer : Rasterizer
     {
-        public GraphicsIMP(int width, int height)
-            :base(width, height)
+        public override List<Fragment> Do(Vertex a, Vertex b, Vertex c)
         {
-            
+            _fragments.Clear();
+
+            ScanLine(a, b);
+            ScanLine(b, c);
+            ScanLine(c, a);
+
+            return _fragments;
         }
 
-        public override void DrawPoint(Vector p, Color color)
+        private void ScanLine(Vertex a, Vertex b)
         {
-            SetPixel(p.x, p.y, color);
-        }
+            Vector pa = a.position;
+            Vector pb = b.position;
 
-        public override void DrawLine(Vector a, Vector b, Color color)
-        {
-            DrawLine(a, b, ref color);
-        }
+            int x1 = (int)pa.x;
+            int y1 = (int)pa.y;
+            int x2 = (int)pb.x;
+            int y2 = (int)pb.y;
 
-        private void DrawLine(Vector a, Vector b, ref Color color)
-        {
-            int x1 = (int)a.x;
-            int y1 = (int)a.y;
-            int x2 = (int)b.x;
-            int y2 = (int)b.y;
+            Fragment fragment = null;
 
             if (x1 == x2 && y1 == y2)
             {
-                SetPixel(x1, y1, color);
+                fragment = new Fragment(x1, y1);
+                _fragments.Add(fragment);
             }
             else if (x1 == x2)
             {
                 int i = (y1 <= y2) ? 1 : -1;
                 for (int y = y1; y != y2; y += i)
                 {
-                    SetPixel(x1, y, color);
+                    fragment = new Fragment(x1, y);
+                    _fragments.Add(fragment);
                 }
-                SetPixel(x2, y2, color);
+
+                fragment = new Fragment(x2, y2);
+                _fragments.Add(fragment);
             }
             else if (y1 == y2)
             {
                 int i = (x1 <= x2) ? 1 : -1;
                 for (int x = x1; x != x2; x += i)
                 {
-                    SetPixel(x, y1, color);
+                    fragment = new Fragment(x, y1);
+                    _fragments.Add(fragment);
                 }
-                SetPixel(x2, y2, color);
+
+                fragment = new Fragment(x2, y2);
+                _fragments.Add(fragment);
             }
             else
             {
@@ -73,16 +81,22 @@ namespace SoftwareRenderer
 
                     for (x = x1, y = y1; x <= x2; x++)
                     {
-                        SetPixel(x, y, color);
+                        fragment = new Fragment(x, y);
+                        _fragments.Add(fragment);
+
                         r += dy;
                         if (r >= dx)
                         {
                             r -= dx;
                             y += (y2 >= y1) ? 1 : -1;
-                            SetPixel(x, y, color);
+
+                            fragment = new Fragment(x, y);
+                            _fragments.Add(fragment);
                         }
                     }
-                    SetPixel(x2, y2, color);
+
+                    fragment = new Fragment(x2, y2);
+                    _fragments.Add(fragment);
                 }
                 else
                 {
@@ -100,16 +114,22 @@ namespace SoftwareRenderer
 
                     for (x = x1, y = y1; y <= y2; y++)
                     {
-                        SetPixel(x, y, color);
+                        fragment = new Fragment(x, y);
+                        _fragments.Add(fragment);
+
                         r += dx;
                         if (r >= dy)
                         {
                             r -= dy;
                             x += (x2 >= x1) ? 1 : -1;
-                            SetPixel(x, y, color);
+
+                            fragment = new Fragment(x, y);
+                            _fragments.Add(fragment);
                         }
                     }
-                    SetPixel(x2, y2, color);
+
+                    fragment = new Fragment(x2, y2);
+                    _fragments.Add(fragment);
                 }
             }
         }

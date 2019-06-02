@@ -61,19 +61,9 @@ namespace SoftwareRenderer
                 {
                     _dirty = false;
 
-                    Matrix t = new Matrix(new []{
-                        1.0f, 0.0f, 0.0f, _position.x,
-                        0.0f, 1.0f, 0.0f, _position.y,
-                        0.0f, 0.0f, 1.0f, _position.z,
-                        0.0f, 0.0f, 0.0f, 1.0f,
-                    });
+                    Matrix t = Matrix.Translation(position);
                     Matrix r = Matrix.Rotation(rotation);
-                    Matrix s = new Matrix(new[]{
-                        _scale.x, 0.0f,     0.0f,     0.0f,
-                        0.0f,     _scale.y, 0.0f,     0.0f,
-                        0.0f,     0.0f,     _scale.z, 0.0f,
-                        0.0f,     0.0f,     0.0f,     1.0f,
-                    });
+                    Matrix s = Matrix.Scale(scale);
 
                     _modelToWorldMatrix = s * r * t;
                 }

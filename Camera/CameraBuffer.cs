@@ -5,18 +5,18 @@ namespace SoftwareRenderer
 {
     class CameraBuffer
     {
-        public GraphicsDevice foreground { get; private set; }
-        public GraphicsDevice background { get; private set; }
+        public CameraCanvas foreground { get; private set; }
+        public CameraCanvas background { get; private set; }
 
         public CameraBuffer(int width, int height)
         {
-            foreground = new GraphicsIMP(width, height);
-            background = new GraphicsIMP(width, height);
+            foreground = new CameraCanvas(width, height);
+            background = new CameraCanvas(width, height);
         }
 
         public void Swap()
         {
-            GraphicsDevice t = foreground;
+            CameraCanvas t = foreground;
             foreground = background;
             background = t;
         }

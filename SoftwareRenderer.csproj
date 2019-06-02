@@ -46,9 +46,7 @@
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Camera\Camera.cs" />
     <Compile Include="Camera\CameraBuffer.cs" />
-    <Compile Include="Camera\Graphics\GraphicsDevice.cs" />
-    <Compile Include="Camera\Graphics\GraphicsGDI.cs" />
-    <Compile Include="Camera\Graphics\GraphicsIMP.cs" />
+    <Compile Include="Camera\CameraCanvas.cs" />
     <Compile Include="Math\Mathf.cs" />
     <Compile Include="Math\Matrix.cs" />
     <Compile Include="Math\Vector.cs" />
@@ -70,6 +68,7 @@
     <Compile Include="Rasterizer\TriangleBarycentricRasterizer.cs" />
     <Compile Include="Rasterizer\TriangleBresenhamRasterizer.cs" />
     <Compile Include="Rasterizer\TriangleStandardRasterizer.cs" />
+    <Compile Include="Rasterizer\WireframeBresenhamRasterizer.cs" />
     <Compile Include="Screen.cs" />
     <Compile Include="Shader\FragmentShader.cs" />
     <Compile Include="Shader\VertexShader.cs" />

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Drawing;
 
 namespace SoftwareRenderer
@@ -27,9 +27,9 @@ namespace SoftwareRenderer
     /// </summary>
     class TriangleBarycentricRasterizer : Rasterizer
     {
-        public override void Do(Vertex a, Vertex b, Vertex c)
+        public override List<Fragment> Do(Vertex a, Vertex b, Vertex c)
         {
-            fragments.Clear();
+            _fragments.Clear();
 
             Vector pa = a.position;
             Vector pb = b.position;
@@ -54,15 +54,14 @@ namespace SoftwareRenderer
 
                     if ((s >= 0) && (t >= 0) && (s + t <= 1))
                     {
-                        Fragment fg = new Fragment();
-                        fg.x = x;
-                        fg.y = y;
-                        //TODO 还需要完成depth和uv的插值
-
-                        fragments.Add(fg);
+                        //TODO 还需要完成z和uv的插值
+                        Fragment fg = new Fragment(x, y);
+                        _fragments.Add(fg);
                     }
                 }
             }
+
+            return _fragments;
         }
     }
 }

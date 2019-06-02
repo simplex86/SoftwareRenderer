@@ -77,17 +77,17 @@ namespace SoftwareRenderer
 
         public static Vector right
         {
-            get { return new Vector(0, 1, 0, 0); }
+            get { return new Vector(1, 0, 0, 0); }
         }
 
         public static Vector up
         {
-            get { return new Vector(0, 0, -1, 0); }
+            get { return new Vector(0, 1, 0, 0); }
         }
 
         public static Vector forward
         {
-            get { return new Vector(-1, 0, 0, 0); }
+            get { return new Vector(0, 0, 1, 0); }
         }
 
         public static Vector operator +(Vector a, Vector b)

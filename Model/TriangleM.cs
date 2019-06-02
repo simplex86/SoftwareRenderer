@@ -8,9 +8,9 @@ namespace SoftwareRenderer
         public TriangleM()
         {
             List<Vector> vertics = mesh.vertics;
-            vertics.Add(new Vector(0, 0, 1));
-            vertics.Add(new Vector(0, 0.5f, 0));
-            vertics.Add(new Vector(0, -0.5f, 0));
+            vertics.Add(new Vector( 0,     1,    0));
+            vertics.Add(new Vector( 0.5f, -0.5f, 0));
+            vertics.Add(new Vector(-0.5f, -0.5f, 0));
 
             List<TexCoord> uvs = mesh.uvs;
             uvs.Add(new TexCoord(0, 0));

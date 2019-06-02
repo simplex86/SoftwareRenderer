@@ -9,11 +9,12 @@ namespace SoftwareRenderer
         public Pyramid()
         {
             List<Vector> vertics = mesh.vertics;
-            vertics.Add(new Vector(0, 0, -1));
-            vertics.Add(new Vector(-1, -1, 1));
-            vertics.Add(new Vector(-1, 1, 1));
-            vertics.Add(new Vector(1, 1, 1));
-            vertics.Add(new Vector(1, -1, 1));
+
+            vertics.Add(new Vector( 0,  1,  0));
+            vertics.Add(new Vector(-1, -1, -1));
+            vertics.Add(new Vector( 1, -1, -1));
+            vertics.Add(new Vector( 1, -1,  1));
+            vertics.Add(new Vector(-1, -1,  1));
 
             List<TexCoord> uvs = mesh.uvs;
             uvs.Add(new TexCoord(0, 0));
@@ -29,12 +30,12 @@ namespace SoftwareRenderer
 
             List<Triangle> triangles = mesh.triangles;
             //顺时针方向构造三角形
-            triangles.Add(new Triangle(idx0, idx1, idx2));
-            triangles.Add(new Triangle(idx0, idx2, idx3));
-            triangles.Add(new Triangle(idx0, idx3, idx4));
-            triangles.Add(new Triangle(idx0, idx4, idx1));
-            triangles.Add(new Triangle(idx3, idx2, idx1));
-            triangles.Add(new Triangle(idx1, idx4, idx3));
+            triangles.Add(new Triangle(idx0, idx2, idx1));
+            triangles.Add(new Triangle(idx0, idx3, idx2));
+            triangles.Add(new Triangle(idx0, idx4, idx3));
+            triangles.Add(new Triangle(idx0, idx1, idx4));
+            triangles.Add(new Triangle(idx3, idx1, idx2));
+            triangles.Add(new Triangle(idx1, idx3, idx4));
         }
     }
 }
