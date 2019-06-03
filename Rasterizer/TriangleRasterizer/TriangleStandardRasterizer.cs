@@ -23,7 +23,7 @@ namespace SoftwareRenderer
     /// 参考文献：
     /// Standard Algorithm - http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html#algo1
     /// </summary>
-    class TriangleStandardRasterizer : Rasterizer
+    class TriangleStandardRasterizer : TriangleRasterizer
     {
         public override List<Fragment> Do(Vertex a, Vertex b, Vertex c)
         {
@@ -40,30 +40,30 @@ namespace SoftwareRenderer
             }
             else
             {
-                Vector pa = a.position;
-                Vector pb = b.position;
-                Vector pc = c.position;
+                Vector4 pa = a.position;
+                Vector4 pb = b.position;
+                Vector4 pc = c.position;
 
                 float x = pa.x + (pb.y - pa.y) / (pc.y - pa.y) * (pc.x - pa.x);
                 float y = pb.y;
                 float z = LerpZ(pa.x, pc.x, x, 1 / pa.z, 1 / pb.z);
 
                 Vertex m = new Vertex();
-                m.position = new Vector(x, y, 1 / z, 0);
-                m.color = c.color;//TODO 插值得到
+                m.position = new Vector4(x, y, 1 / z);
                 m.uv = c.uv;//TODO 插值得到
 
                 RasterizeBottomTriangle(a, b, m);
                 RasterizeTopTriangle(b, m, c);
             }
+            Color(a, b, c);
 
             return _fragments;
         }
 
         private void Sort(ref Vertex a, ref Vertex b, ref Vertex c)
         {
-            Vector   pt;
-            Color    ct;
+            Vector4   pt;
+            Color4    ct;
             TexCoord ut;
 
             if (a.position.y > b.position.y)
@@ -114,9 +114,9 @@ namespace SoftwareRenderer
 
         private void RasterizeTopTriangle(Vertex a, Vertex b, Vertex c)
         {
-            Vector pa = a.position;
-            Vector pb = b.position;
-            Vector pc = c.position;
+            Vector4 pa = a.position;
+            Vector4 pb = b.position;
+            Vector4 pc = c.position;
 
             float invslope_ca = (pc.x - pa.x) / (pc.y - pa.y);
             float invslope_cb = (pc.x - pb.x) / (pc.y - pb.y);
@@ -152,9 +152,9 @@ namespace SoftwareRenderer
 
         private void RasterizeBottomTriangle(Vertex a, Vertex b, Vertex c)
         {
-            Vector pa = a.position;
-            Vector pb = b.position;
-            Vector pc = c.position;
+            Vector4 pa = a.position;
+            Vector4 pb = b.position;
+            Vector4 pc = c.position;
 
             float invslope_ab = (pa.x - pb.x) / (pa.y - pb.y);
             float invslope_ac = (pa.x - pc.x) / (pa.y - pc.y);
@@ -193,7 +193,7 @@ namespace SoftwareRenderer
             for (int x = sx; x <= ex; x++)
             {
                 float iz = LerpZ(sx, ex, x, sz, ez);
-                //TODO 还需要完成z和uv的插值
+                //TODO 还需要完成uv的插值
                 Fragment fg = new Fragment(x, y, 1 / iz);
                 _fragments.Add(fg);
             }

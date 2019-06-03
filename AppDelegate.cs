@@ -29,12 +29,12 @@ namespace SoftwareRenderer
 
         public void Run()
         {
-            _camera.position = new Vector(0, 0, _cameraPosForward);
+            _camera.position = new Vector4(0, 0, _cameraPosForward);
             _camera.fov = 90;
-            _camera.LookAt(new Vector(0.0f, -0.5f, 0.2f), Vector.up);
-            _camera.renderType = Camera.RenderType.WIREFRAME;
+            _camera.LookAt(new Vector4(0.0f, -0.5f, 0.2f), Vector4.up);
+            _camera.renderType = Camera.RenderType.COLOR;
 
-            Model model = new Pyramid();
+            Model model = new TriangleM();
             _meshes.Add(model.mesh);
 
             _form.Show();
@@ -71,7 +71,7 @@ namespace SoftwareRenderer
                 _meshRotationUp += 0.05f;
                 foreach (Mesh mesh in _meshes)
                 {
-                    mesh.rotation = new Vector(0, _meshRotationUp, 0);
+                    mesh.rotation = new Vector4(0, _meshRotationUp, 0);
                 }
             }
             else if (e.KeyCode == Keys.Right)//右转
@@ -79,18 +79,18 @@ namespace SoftwareRenderer
                 _meshRotationUp -= 0.05f;
                 foreach (Mesh mesh in _meshes)
                 {
-                    mesh.rotation = new Vector(0, _meshRotationUp, 0);
+                    mesh.rotation = new Vector4(0, _meshRotationUp, 0);
                 }
             }
             else if (e.KeyCode == Keys.Up)//拉近
             {
                 _cameraPosForward += 0.1f;
-                _camera.position = new Vector(0, 0, _cameraPosForward);
+                _camera.position = new Vector4(0, 0, _cameraPosForward);
             }
             else if (e.KeyCode == Keys.Down)//推远
             {
                 _cameraPosForward -= 0.1f;
-                _camera.position = new Vector(0, 0, _cameraPosForward);
+                _camera.position = new Vector4(0, 0, _cameraPosForward);
             }
         }
     }

@@ -18,8 +18,8 @@ namespace SoftwareRenderer
 
         private void ScanLine(Vertex a, Vertex b)
         {
-            Vector pa = a.position;
-            Vector pb = b.position;
+            Vector4 pa = a.position;
+            Vector4 pb = b.position;
 
             int x1 = (int)pa.x;
             int y1 = (int)pa.y;

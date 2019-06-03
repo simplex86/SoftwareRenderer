@@ -12,21 +12,21 @@ namespace SoftwareRenderer
             COLOR,
         }
 
-        private Vector _position = Vector.zero;
-        private Vector _direction = Vector.forward;
-        private Vector _up = Vector.up;
+        private Vector4 _position = Vector4.zero;
+        private Vector4 _direction = Vector4.forward;
+        private Vector4 _up = Vector4.up;
         private float _fov = 90.0f;
         private float _near = 0.1f;
         private float _far = 100;
         private RenderType _renderType = RenderType.WIREFRAME;
         private bool _dirty = false;
         private CameraBuffer _gbuffer = new CameraBuffer(Screen.WIDTH, Screen.HEIGHT);
-        private Matrix _worldToCameraMatrix;
-        private Matrix _projectionMatrix;
+        private Matrix4x4 _worldToCameraMatrix;
+        private Matrix4x4 _projectionMatrix;
         private VertexShader _vertexShader = new VertexShader();
         private Rasterizer _raster = new WireframeBresenhamRasterizer();
         private FragmentShader _fragmentShader = new FragmentShader();
-        private float[] _zbuffer = new float[Screen.WIDTH * Screen.HEIGHT];
+        private float[, ] _zbuffer = new float[Screen.WIDTH, Screen.HEIGHT];
 
         public Camera()
         {
@@ -36,7 +36,7 @@ namespace SoftwareRenderer
             ClearZBuffer();
         }
 
-        public void LookAt(Vector target, Vector up)
+        public void LookAt(Vector4 target, Vector4 up)
         {
             _direction = target - position;
             _up = up;
@@ -45,7 +45,7 @@ namespace SoftwareRenderer
 
         public void Render(Graphics grap, List<Mesh> meshes)
         {
-            _gbuffer.foreground.Clear(Color.White);
+            _gbuffer.foreground.Clear(Color4.white);
 
             if (_dirty)
             {
@@ -66,7 +66,7 @@ namespace SoftwareRenderer
             _gbuffer.background.Flush(grap);
         }
 
-        public Vector position
+        public Vector4 position
         {
             set
             {
@@ -76,7 +76,7 @@ namespace SoftwareRenderer
             get { return _position; }
         }
 
-        public Vector direction
+        public Vector4 direction
         {
             set
             {
@@ -147,28 +147,28 @@ namespace SoftwareRenderer
             _projectionMatrix = GetPerspectiveMatrix();
         }
 
-        private Matrix GetCameraMatrix()
+        private Matrix4x4 GetCameraMatrix()
         {
-            Vector cz = Vector.Normalize(direction);
-            Vector cx = Vector.Normalize(Vector.Cross(_up, cz));
-            Vector cy = Vector.Cross(cz, cx);
+            Vector4 cz = Vector4.Normalize(direction);
+            Vector4 cx = Vector4.Normalize(Vector4.Cross(_up, cz));
+            Vector4 cy = Vector4.Cross(cz, cx);
 
-            float tx = -Vector.Dot(position, cx);
-            float ty = -Vector.Dot(position, cy);
-            float tz = -Vector.Dot(position, cz);
+            float tx = -Vector4.Dot(position, cx);
+            float ty = -Vector4.Dot(position, cy);
+            float tz = -Vector4.Dot(position, cz);
 
-            Matrix matrix = new Matrix(new[]{ cx.x, cy.x, cz.x, 0.0f,
-                                              cx.y, cy.y, cz.y, 0.0f,
-                                              cx.z, cy.z, cz.z, 0.0f,
-                                              tx,   ty,   tz,   1.0f,
+            Matrix4x4 matrix = new Matrix4x4(new[]{ cx.x, cy.x, cz.x, 0.0f,
+                                                    cx.y, cy.y, cz.y, 0.0f,
+                                                    cx.z, cy.z, cz.z, 0.0f,
+                                                    tx,   ty,   tz,   1.0f,
             });
 
             return matrix;
         }
 
-        private Matrix GetPerspectiveMatrix()
+        private Matrix4x4 GetPerspectiveMatrix()
         {
-            Matrix m = Matrix.zero;
+            Matrix4x4 m = Matrix4x4.zero;
             float fax = 1.0f / Mathf.Tan(Mathf.Deg2Rad(_fov * 0.5f));
 
             m[0, 0] = fax / aspect;
@@ -185,12 +185,12 @@ namespace SoftwareRenderer
             if (mesh == null)
                 return;
 
-            Matrix mvp = mesh.modelToWorldMatrix * _worldToCameraMatrix * _projectionMatrix;
-            foreach (Triangle triangle in mesh.triangles)
+            Matrix4x4 mvp = mesh.modelToWorldMatrix * _worldToCameraMatrix * _projectionMatrix;
+            foreach (Triangle t in mesh.triangles)
             {
-                Vertex a = GetVertex(mesh, triangle.a.vertex, triangle.a.uv);
-                Vertex b = GetVertex(mesh, triangle.b.vertex, triangle.b.uv);
-                Vertex c = GetVertex(mesh, triangle.c.vertex, triangle.c.uv);
+                Vertex a = GetVertex(mesh, t.a.vertex, t.a.color, t.a.uv);
+                Vertex b = GetVertex(mesh, t.b.vertex, t.b.color, t.b.uv);
+                Vertex c = GetVertex(mesh, t.c.vertex, t.c.color, t.c.uv);
 
                 //背面剔除
                 if (CullBackface(a.position, b.position, c.position, mesh.modelToWorldMatrix))
@@ -204,9 +204,9 @@ namespace SoftwareRenderer
                 Clip(a, b, c);
 
                 //透视除法
-                Vector clip1 = a.position;
-                Vector clip2 = b.position;
-                Vector clip3 = c.position;
+                Vector4 clip1 = a.position;
+                Vector4 clip2 = b.position;
+                Vector4 clip3 = c.position;
                 clip1.DivW();
                 clip2.DivW();
                 clip3.DivW();
@@ -214,9 +214,9 @@ namespace SoftwareRenderer
                 //屏幕映射
                 float w = Screen.WIDTH  * 0.5f;
                 float h = Screen.HEIGHT * 0.5f;
-                a.position = new Vector(w * clip1.x + w, h - h * clip1.y, clip1.z);
-                b.position = new Vector(w * clip2.x + w, h - h * clip2.y, clip2.z);
-                c.position = new Vector(w * clip3.x + w, h - h * clip3.y, clip3.z);
+                a.position = new Vector4(w * clip1.x + w, h - h * clip1.y, clip1.z);
+                b.position = new Vector4(w * clip2.x + w, h - h * clip2.y, clip2.z);
+                c.position = new Vector4(w * clip3.x + w, h - h * clip3.y, clip3.z);
 
                 //光栅化
                 List<Fragment> fragments = _raster.Do(a, b, c);
@@ -227,7 +227,7 @@ namespace SoftwareRenderer
                     foreach (Fragment fragment in fragments)
                     {
                         Fragment fg = _fragmentShader.Do(fragment);
-                        _gbuffer.foreground.DrawPoint(new Vector(fg.x, fg.y, fg.depth, 0), Color.Black);
+                        _gbuffer.foreground.DrawPoint(new Vector4(fg.x, fg.y, fg.depth, 0), Color4.black);
                     }
                 }
                 else if (renderType == RenderType.COLOR)
@@ -239,7 +239,7 @@ namespace SoftwareRenderer
                         Fragment fg = _fragmentShader.Do(fragment);
                         if (ZTest(fg.x, fg.y, fg.depth))
                         {
-                            _gbuffer.foreground.DrawPoint(new Vector(fg.x, fg.y, fg.depth, 0), Color.DarkBlue);
+                            _gbuffer.foreground.DrawPoint(new Vector4(fg.x, fg.y, fg.depth, 0), fg.color);
                         }
                     }
 
@@ -248,25 +248,34 @@ namespace SoftwareRenderer
             }
         }
 
-        private Vertex GetVertex(Mesh mesh, int vertex, int uv)
+        private Vertex GetVertex(Mesh mesh, int vertex, int color, int uv)
         {
             Vertex v = new Vertex();
             v.position = mesh.vertics[vertex];
-            v.uv = mesh.uvs[uv];
+
+            if (mesh.colors.Count > 0)
+            {
+                v.color = mesh.colors[color];
+            }
+
+            if (mesh.uvs.Count > 0)
+            {
+                v.uv = mesh.uvs[uv];
+            }
 
             return v;
         }
 
-        private bool CullBackface(Vector a, Vector b, Vector c, Matrix modelToWorldMatrix)
+        private bool CullBackface(Vector4 a, Vector4 b, Vector4 c, Matrix4x4 modelToWorldMatrix)
         {
             a *= modelToWorldMatrix;
             b *= modelToWorldMatrix;
             c *= modelToWorldMatrix;
 
-            Vector d = _direction;
-            Vector n = Vector.Cross(b - a, c - a);
+            Vector4 d = _direction;
+            Vector4 n = Vector4.Cross(b - a, c - a);
 
-            return Vector.Dot(n, d) >= 0.0f;
+            return Vector4.Dot(n, d) >= 0.0f;
         }
 
         private void Clip(Vertex a, Vertex b, Vertex c)
@@ -278,11 +287,9 @@ namespace SoftwareRenderer
         {
             foreach (Fragment fg in fragments)
             {
-                int idx = fg.y * Screen.WIDTH + fg.x;
-
-                if (_zbuffer[idx] < fg.depth)
+                if (_zbuffer[fg.x, fg.y] > fg.depth)
                 {
-                    _zbuffer[idx] = fg.depth;
+                    _zbuffer[fg.x, fg.y] = fg.depth;
                 }
             }
         }
@@ -290,14 +297,17 @@ namespace SoftwareRenderer
         private bool ZTest(int x, int y, float z)
         {
             int idx = y * Screen.WIDTH + x;
-            return z >= _zbuffer[idx];
+            return z <= _zbuffer[x, y];
         }
 
         private void ClearZBuffer()
         {
-            for (int i = 0; i < _zbuffer.Length; i++)
+            for (int r = 0; r < _zbuffer.GetLength(0); r++)
             {
-                _zbuffer[i] = float.MinValue;
+                for (int c = 0; c < _zbuffer.GetLength(1); c++)
+                {
+                    _zbuffer[r, c] = float.MaxValue;
+                }
             }
         }
     }

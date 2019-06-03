@@ -7,7 +7,7 @@ namespace SoftwareRenderer
         public int x;
         public int y;
         public float depth;
-        public Color color;
+        public Color4 color;
         public TexCoord uv;
 
         public Fragment(int x, int y)
@@ -23,7 +23,7 @@ namespace SoftwareRenderer
             this.depth = depth;
         }
 
-        public Fragment(int x, int y, float depth, Color color)
+        public Fragment(int x, int y, float depth, Color4 color)
         {
             this.x = x;
             this.y = y;
@@ -31,7 +31,7 @@ namespace SoftwareRenderer
             this.color = color;
         }
 
-        public Fragment(int x, int y, float depth, Color color, TexCoord uv)
+        public Fragment(int x, int y, float depth, Color4 color, TexCoord uv)
         {
             this.x = x;
             this.y = y;

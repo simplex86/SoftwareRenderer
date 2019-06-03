@@ -14,7 +14,7 @@ namespace SoftwareRenderer
             _graphics = Graphics.FromImage(_bitmap);
         }
 
-        public void DrawPoint(Vector p, Color color)
+        public void DrawPoint(Vector4 p, Color4 color)
         {
             _bitmap.SetPixel((int)p.x, (int)p.y, color);
         }
@@ -29,7 +29,7 @@ namespace SoftwareRenderer
             grap.DrawImage(_bitmap, x, y);
         }
 
-        public void Clear(Color color)
+        public void Clear(Color4 color)
         {
             _graphics.Clear(color);
         }

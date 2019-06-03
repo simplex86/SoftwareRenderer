@@ -51,6 +51,16 @@ namespace SoftwareRenderer
             get { return _a; }
         }
 
+        public static Color4 operator *(Color4 c, float t)
+        {
+            return new Color4(c.r * t, c.g * t, c.b * t, c.a * t);
+        }
+
+        public static Color4 operator +(Color4 a, Color4 b)
+        {
+            return new Color4(a.r + b.r, a.g + b.g, a.b + b.b, a.a + b.a);
+        }
+
         public static Color4 Lerp(Color4 ca, Color4 cb, float t)
         {
             float r = Mathf.Lerp(ca.r, cb.r, t);
@@ -69,6 +79,36 @@ namespace SoftwareRenderer
             int a = (int)(c.a * 255);
 
             return Color.FromArgb(a, r, g, b);
+        }
+
+        public static Color4 white
+        {
+            get { return new Color4(Color.White); }
+        }
+
+        public static Color4 black
+        {
+            get { return new Color4(Color.Black); }
+        }
+
+        public static Color4 red
+        {
+            get { return new Color4(Color.Red); }
+        }
+
+        public static Color4 green
+        {
+            get { return new Color4(Color.Green); }
+        }
+
+        public static Color4 blue
+        {
+            get { return new Color4(Color.Blue); }
+        }
+
+        public static Color4 yellow
+        {
+            get { return new Color4(Color.Yellow); }
         }
     }
 }

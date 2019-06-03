@@ -48,8 +48,8 @@
     <Compile Include="Camera\CameraBuffer.cs" />
     <Compile Include="Camera\CameraCanvas.cs" />
     <Compile Include="Math\Mathf.cs" />
-    <Compile Include="Math\Matrix.cs" />
-    <Compile Include="Math\Vector.cs" />
+    <Compile Include="Math\Matrix4x4.cs" />
+    <Compile Include="Math\Vector4.cs" />
     <Compile Include="Mesh\Color4.cs" />
     <Compile Include="Mesh\Mesh.cs" />
     <Compile Include="Mesh\Triangle.cs" />
@@ -65,10 +65,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rasterizer\Fragment.cs" />
     <Compile Include="Rasterizer\Rasterizer.cs" />
-    <Compile Include="Rasterizer\TriangleBarycentricRasterizer.cs" />
-    <Compile Include="Rasterizer\TriangleBresenhamRasterizer.cs" />
-    <Compile Include="Rasterizer\TriangleStandardRasterizer.cs" />
-    <Compile Include="Rasterizer\WireframeBresenhamRasterizer.cs" />
+    <Compile Include="Rasterizer\TriangleRasterizer\TriangleBarycentricRasterizer.cs" />
+    <Compile Include="Rasterizer\TriangleRasterizer\TriangleBresenhamRasterizer.cs" />
+    <Compile Include="Rasterizer\TriangleRasterizer\TriangleRasterizer.cs" />
+    <Compile Include="Rasterizer\TriangleRasterizer\TriangleStandardRasterizer.cs" />
+    <Compile Include="Rasterizer\WireframeRasterizer\WireframeBresenhamRasterizer.cs" />
+    <Compile Include="Rasterizer\WireframeRasterizer\WireframeRasterizer.cs" />
     <Compile Include="Screen.cs" />
     <Compile Include="Shader\FragmentShader.cs" />
     <Compile Include="Shader\VertexShader.cs" />

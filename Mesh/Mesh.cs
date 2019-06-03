@@ -5,25 +5,27 @@ namespace SoftwareRenderer
 {
     class Mesh
     {
-        public List<Vector> vertics { get; set; }
-        public List<TexCoord> uvs { get; set; }
-        public List<Triangle> triangles { get; set; }
+        public List<Vector4> vertics { get; private set; }
+        public List<Color4> colors { get; private set; }
+        public List<TexCoord> uvs { get; private set; }
+        public List<Triangle> triangles { get; private set; }
 
-        private Vector _position = Vector.zero;
-        private Vector _rotation = Vector.zero;
-        private Vector _scale = Vector.one;
+        private Vector4 _position = Vector4.zero;
+        private Vector4 _rotation = Vector4.zero;
+        private Vector4 _scale = Vector4.one;
 
-        private Matrix _modelToWorldMatrix = Matrix.identity;
+        private Matrix4x4 _modelToWorldMatrix = Matrix4x4.identity;
         private bool _dirty = false;
 
         public Mesh()
         {
-            vertics = new List<Vector>();
+            vertics = new List<Vector4>();
+            colors = new List<Color4>();
             uvs = new List<TexCoord>();
             triangles = new List<Triangle>();
         }
 
-        public Vector position 
+        public Vector4 position 
         {
             set 
             {
@@ -33,7 +35,7 @@ namespace SoftwareRenderer
             get { return _position; }
         }
 
-        public Vector rotation 
+        public Vector4 rotation 
         {
             set 
             {
@@ -43,7 +45,7 @@ namespace SoftwareRenderer
             get { return _rotation; }
         }
 
-        public Vector scale 
+        public Vector4 scale 
         {
             set 
             {
@@ -53,7 +55,7 @@ namespace SoftwareRenderer
             get { return _scale; }
         }
 
-        public Matrix modelToWorldMatrix
+        public Matrix4x4 modelToWorldMatrix
         { 
             get 
             {
@@ -61,9 +63,9 @@ namespace SoftwareRenderer
                 {
                     _dirty = false;
 
-                    Matrix t = Matrix.Translation(position);
-                    Matrix r = Matrix.Rotation(rotation);
-                    Matrix s = Matrix.Scale(scale);
+                    Matrix4x4 t = Matrix4x4.Translation(position);
+                    Matrix4x4 r = Matrix4x4.Rotation(rotation);
+                    Matrix4x4 s = Matrix4x4.Scale(scale);
 
                     _modelToWorldMatrix = s * r * t;
                 }
@@ -75,6 +77,7 @@ namespace SoftwareRenderer
         public void Clear()
         {
             vertics.Clear();
+            colors.Clear();
             uvs.Clear();
             triangles.Clear();
         }

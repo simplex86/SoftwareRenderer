@@ -7,30 +7,24 @@ namespace SoftwareRenderer
     {
         public Cube()
         {
-            List<Vector> vertics = mesh.vertics;
-            vertics.Add(new Vector(-1,  1, -1));
-            vertics.Add(new Vector( 1,  1, -1));
-            vertics.Add(new Vector( 1, -1, -1));
-            vertics.Add(new Vector(-1, -1, -1));
-            vertics.Add(new Vector(-1,  1,  1));
-            vertics.Add(new Vector( 1,  1,  1));
-            vertics.Add(new Vector( 1, -1,  1));
-            vertics.Add(new Vector(-1, -1,  1));
+            List<Vector4> vertics = mesh.vertics;
+            vertics.Add(new Vector4(-1,  1, -1));
+            vertics.Add(new Vector4( 1,  1, -1));
+            vertics.Add(new Vector4( 1, -1, -1));
+            vertics.Add(new Vector4(-1, -1, -1));
+            vertics.Add(new Vector4(-1,  1,  1));
+            vertics.Add(new Vector4( 1,  1,  1));
+            vertics.Add(new Vector4( 1, -1,  1));
+            vertics.Add(new Vector4(-1, -1,  1));
 
-            List<TexCoord> uvs = mesh.uvs;
-            uvs.Add(new TexCoord(0, 0));
-            uvs.Add(new TexCoord(1, 0));
-            uvs.Add(new TexCoord(1, 1));
-            uvs.Add(new TexCoord(0, 1));
-
-            Triangle.Index idx0 = new Triangle.Index(0, 0);
-            Triangle.Index idx1 = new Triangle.Index(1, 1);
-            Triangle.Index idx2 = new Triangle.Index(2, 2);
-            Triangle.Index idx3 = new Triangle.Index(3, 3);
-            Triangle.Index idx4 = new Triangle.Index(4, 1);
-            Triangle.Index idx5 = new Triangle.Index(5, 0);
-            Triangle.Index idx6 = new Triangle.Index(6, 3);
-            Triangle.Index idx7 = new Triangle.Index(7, 2);
+            Triangle.Index idx0 = new Triangle.Index(0, 0, 0);
+            Triangle.Index idx1 = new Triangle.Index(1, 1, 0);
+            Triangle.Index idx2 = new Triangle.Index(2, 2, 0);
+            Triangle.Index idx3 = new Triangle.Index(3, 3, 0);
+            Triangle.Index idx4 = new Triangle.Index(4, 4, 0);
+            Triangle.Index idx5 = new Triangle.Index(5, 5, 0);
+            Triangle.Index idx6 = new Triangle.Index(6, 6, 0);
+            Triangle.Index idx7 = new Triangle.Index(7, 7, 0);
             //顺时针方向构造三角形
             List<Triangle> triangles = mesh.triangles;
             //前

@@ -25,32 +25,32 @@ namespace SoftwareRenderer
     /// 
     /// 实践表明，实现简单但是性能很差！！！！！！！！！
     /// </summary>
-    class TriangleBarycentricRasterizer : Rasterizer
+    class TriangleBarycentricRasterizer : TriangleRasterizer
     {
         public override List<Fragment> Do(Vertex a, Vertex b, Vertex c)
         {
             _fragments.Clear();
 
-            Vector pa = a.position;
-            Vector pb = b.position;
-            Vector pc = c.position;
+            Vector4 pa = a.position;
+            Vector4 pb = b.position;
+            Vector4 pc = c.position;
 
             int left   = (int)Mathf.Min(pa.x, pb.x, pc.x);
             int right  = (int)Mathf.Max(pa.x, pb.x, pc.x);
             int top    = (int)Mathf.Min(pa.y, pb.y, pc.y);
             int bottom = (int)Mathf.Max(pa.y, pb.y, pc.y);
 
-            Vector ab = pb - pa;
-            Vector ac = pc - pa;
+            Vector4 ab = pb - pa;
+            Vector4 ac = pc - pa;
 
             for (int y = top; y < bottom; y++)
             {
                 for (int x = left; x < right; x++)
                 {
-                    Vector pp = new Vector(x - pa.x, y - pa.y, 0, 0);
+                    Vector4 pp = new Vector4(x - pa.x, y - pa.y, 0, 0);
 
-                    float s = Vector.Cross(pp, ac).z / Vector.Cross(ab, ac).z;
-                    float t = Vector.Cross(ab, pp).z / Vector.Cross(ab, ac).z;
+                    float s = Vector4.Cross(pp, ac).z / Vector4.Cross(ab, ac).z;
+                    float t = Vector4.Cross(ab, pp).z / Vector4.Cross(ab, ac).z;
 
                     if ((s >= 0) && (t >= 0) && (s + t <= 1))
                     {
@@ -60,6 +60,7 @@ namespace SoftwareRenderer
                     }
                 }
             }
+            Color(a, b, c);
 
             return _fragments;
         }
