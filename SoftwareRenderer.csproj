@@ -45,8 +45,9 @@
   <ItemGroup>
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Camera\Camera.cs" />
-    <Compile Include="Camera\CameraBuffer.cs" />
-    <Compile Include="Camera\CameraCanvas.cs" />
+    <Compile Include="Camera\CanvasBuffer.cs" />
+    <Compile Include="Camera\Canvas.cs" />
+    <Compile Include="Camera\FrameBuffer.cs" />
     <Compile Include="Math\Mathf.cs" />
     <Compile Include="Math\Matrix4x4.cs" />
     <Compile Include="Math\Vector4.cs" />

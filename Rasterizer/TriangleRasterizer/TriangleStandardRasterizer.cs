@@ -128,8 +128,8 @@ namespace SoftwareRenderer
             {
                 for (int y = (int)pc.y; y >= (int)pa.y; y--)
                 {
-                    float sz = LerpZ(pc.y, pa.y, y, 1 / pc.z, 1 / pa.z);
-                    float ez = LerpZ(pc.y, pb.y, y, 1 / pc.z, 1 / pb.z);
+                    float sz = LerpZ(pc.y, pa.y, y, pc.z, pa.z);
+                    float ez = LerpZ(pc.y, pb.y, y, pc.z, pb.z);
 
                     ScanLine((int)x_ca, (int)x_cb, y, sz, ez);
                     x_ca -= invslope_ca;
@@ -140,8 +140,8 @@ namespace SoftwareRenderer
             {
                 for (int y = (int)pc.y; y >= (int)pa.y; y--)
                 {
-                    float sz = LerpZ(pc.y, pb.y, y, 1 / pc.z, 1 / pb.z);
-                    float ez = LerpZ(pc.y, pa.y, y, 1 / pc.z, 1 / pa.z);
+                    float sz = LerpZ(pc.y, pb.y, y, pc.z, pb.z);
+                    float ez = LerpZ(pc.y, pa.y, y,pc.z, pa.z);
 
                     ScanLine((int)x_cb, (int)x_ca, y, sz, ez);
                     x_ca -= invslope_ca;
@@ -166,8 +166,8 @@ namespace SoftwareRenderer
             {
                 for (int y = (int)pa.y; y <= (int)pb.y; y++)
                 {
-                    float sz = LerpZ(pa.y, pb.y, y, 1 / pa.z, 1 / pb.z);
-                    float ez = LerpZ(pa.y, pc.y, y, 1 / pa.z, 1 / pc.z);
+                    float sz = LerpZ(pa.y, pb.y, y, pa.z, pb.z);
+                    float ez = LerpZ(pa.y, pc.y, y, pa.z, pc.z);
 
                     ScanLine((int)x_ab, (int)x_ac, y, sz, ez);
                     x_ab += invslope_ab;
@@ -178,8 +178,8 @@ namespace SoftwareRenderer
             {
                 for (int y = (int)pa.y; y <= (int)pb.y; y++)
                 {
-                    float sz = LerpZ(pa.y, pc.y, y, 1 / pa.z, 1 / pc.z);
-                    float ez = LerpZ(pa.y, pb.y, y, 1 / pa.z, 1 / pb.z);
+                    float sz = LerpZ(pa.y, pc.y, y, pa.z, pc.z);
+                    float ez = LerpZ(pa.y, pb.y, y, pa.z, pb.z);
 
                     ScanLine((int)x_ac, (int)x_ab, y, sz, ez);
                     x_ab += invslope_ab;
@@ -194,7 +194,7 @@ namespace SoftwareRenderer
             {
                 float iz = LerpZ(sx, ex, x, sz, ez);
                 //TODO 还需要完成uv的插值
-                Fragment fg = new Fragment(x, y, 1 / iz);
+                Fragment fg = new Fragment(x, y, iz);
                 _fragments.Add(fg);
             }
         }

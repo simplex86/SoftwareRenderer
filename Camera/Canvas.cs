@@ -3,12 +3,12 @@ using System.Drawing;
 
 namespace SoftwareRenderer
 {
-    class CameraCanvas : IDisposable
+    class Canvas : IDisposable
     {
         protected Bitmap _bitmap { get; private set; }
         protected readonly Graphics _graphics;
 
-        public CameraCanvas(int width, int height)
+        public Canvas(int width, int height)
         {
             _bitmap = new Bitmap(width, height);
             _graphics = Graphics.FromImage(_bitmap);

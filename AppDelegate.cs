@@ -34,7 +34,7 @@ namespace SoftwareRenderer
             _camera.LookAt(new Vector4(0.0f, -0.5f, 0.2f), Vector4.up);
             _camera.renderType = Camera.RenderType.COLOR;
 
-            Model model = new TriangleM();
+            Model model = new Pyramid();
             _meshes.Add(model.mesh);
 
             _form.Show();
@@ -56,7 +56,7 @@ namespace SoftwareRenderer
             }
         }
 
-        void OnCameraPostRender(CameraCanvas canvas)
+        void OnCameraPostRender(Canvas canvas)
         {
             //显示帧率
             canvas.DrawString(string.Format("FPS: {0}", _fps),

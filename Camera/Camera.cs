@@ -20,20 +20,19 @@ namespace SoftwareRenderer
         private float _far = 100;
         private RenderType _renderType = RenderType.WIREFRAME;
         private bool _dirty = false;
-        private CameraBuffer _gbuffer = new CameraBuffer(Screen.WIDTH, Screen.HEIGHT);
+        private CanvasBuffer _gbuffer = new CanvasBuffer(Screen.WIDTH, Screen.HEIGHT);
         private Matrix4x4 _worldToCameraMatrix;
         private Matrix4x4 _projectionMatrix;
         private VertexShader _vertexShader = new VertexShader();
         private Rasterizer _raster = new WireframeBresenhamRasterizer();
         private FragmentShader _fragmentShader = new FragmentShader();
-        private float[, ] _zbuffer = new float[Screen.WIDTH, Screen.HEIGHT];
+        //private float[, ] _zbuffer = new float[Screen.WIDTH, Screen.HEIGHT];
+        private FrameBuffer _frameBuffer = new FrameBuffer(Screen.WIDTH, Screen.HEIGHT);
 
         public Camera()
         {
             aspect = Screen.WIDTH / (float)Screen.HEIGHT;
             _dirty = true;
-
-            ClearZBuffer();
         }
 
         public void LookAt(Vector4 target, Vector4 up)
@@ -138,7 +137,7 @@ namespace SoftwareRenderer
             get { return _renderType; }
         }
 
-        public event Action<CameraCanvas> OnPostRender;
+        public event Action<Canvas> OnPostRender;
 
         private void BuildMatrix()
         {
@@ -196,6 +195,7 @@ namespace SoftwareRenderer
                 if (CullBackface(a.position, b.position, c.position, mesh.modelToWorldMatrix))
                     continue;
 
+                //执行vertexShader
                 a = _vertexShader.Do(a, mvp);
                 b = _vertexShader.Do(b, mvp);
                 c = _vertexShader.Do(c, mvp);
@@ -212,7 +212,7 @@ namespace SoftwareRenderer
                 clip3.DivW();
 
                 //屏幕映射
-                float w = Screen.WIDTH  * 0.5f;
+                float w = Screen.WIDTH * 0.5f;
                 float h = Screen.HEIGHT * 0.5f;
                 a.position = new Vector4(w * clip1.x + w, h - h * clip1.y, clip1.z);
                 b.position = new Vector4(w * clip2.x + w, h - h * clip2.y, clip2.z);
@@ -221,30 +221,31 @@ namespace SoftwareRenderer
                 //光栅化
                 List<Fragment> fragments = _raster.Do(a, b, c);
 
+                //执行fragmentShader并修改frameBuffer
+                foreach (Fragment fragment in fragments)
+                {
+                    Fragment fg = _fragmentShader.Do(fragment);
+
+                    if (fg.depth < _frameBuffer.zbuffer[fg.x, fg.y])
+                    {
+                        _frameBuffer.zbuffer[fg.x, fg.y] = fg.depth;
+                        _frameBuffer.cbuffer[fg.x, fg.y] = fg.color;
+                    }
+                }
+
                 //渲染到屏幕
-                if (renderType == RenderType.WIREFRAME)
+                foreach (Fragment fragment in fragments)
                 {
-                    foreach (Fragment fragment in fragments)
-                    {
-                        Fragment fg = _fragmentShader.Do(fragment);
-                        _gbuffer.foreground.DrawPoint(new Vector4(fg.x, fg.y, fg.depth, 0), Color4.black);
-                    }
-                }
-                else if (renderType == RenderType.COLOR)
-                {
-                    WriteZBuffer(fragments);
+                    int    x     = fragment.x;
+                    int    y     = fragment.y;
+                    float  z     = fragment.depth;
+                    Color4 color = (_renderType == RenderType.WIREFRAME) ? Color4.black : 
+                                                                           _frameBuffer.cbuffer[x, y];
 
-                    foreach (Fragment fragment in fragments)
-                    {
-                        Fragment fg = _fragmentShader.Do(fragment);
-                        if (ZTest(fg.x, fg.y, fg.depth))
-                        {
-                            _gbuffer.foreground.DrawPoint(new Vector4(fg.x, fg.y, fg.depth, 0), fg.color);
-                        }
-                    }
-
-                    ClearZBuffer();
+                    _gbuffer.foreground.DrawPoint(new Vector4(x, y, z, 0), color);
                 }
+
+                _frameBuffer.Clear();
             }
         }
 
@@ -252,11 +253,7 @@ namespace SoftwareRenderer
         {
             Vertex v = new Vertex();
             v.position = mesh.vertics[vertex];
-
-            if (mesh.colors.Count > 0)
-            {
-                v.color = mesh.colors[color];
-            }
+            v.color = mesh.colors[color];
 
             if (mesh.uvs.Count > 0)
             {
@@ -275,40 +272,12 @@ namespace SoftwareRenderer
             Vector4 d = _direction;
             Vector4 n = Vector4.Cross(b - a, c - a);
 
-            return Vector4.Dot(n, d) >= 0.0f;
+            return (n.z >= 0.0f) || (Vector4.Dot(n, d) >= 0.0f);
         }
 
         private void Clip(Vertex a, Vertex b, Vertex c)
         {
             //TODO 未实现
-        }
-
-        private void WriteZBuffer(List<Fragment> fragments)
-        {
-            foreach (Fragment fg in fragments)
-            {
-                if (_zbuffer[fg.x, fg.y] > fg.depth)
-                {
-                    _zbuffer[fg.x, fg.y] = fg.depth;
-                }
-            }
-        }
-
-        private bool ZTest(int x, int y, float z)
-        {
-            int idx = y * Screen.WIDTH + x;
-            return z <= _zbuffer[x, y];
-        }
-
-        private void ClearZBuffer()
-        {
-            for (int r = 0; r < _zbuffer.GetLength(0); r++)
-            {
-                for (int c = 0; c < _zbuffer.GetLength(1); c++)
-                {
-                    _zbuffer[r, c] = float.MaxValue;
-                }
-            }
         }
     }
 }
