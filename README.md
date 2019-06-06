@@ -1,9 +1,9 @@
 # SoftwareRenderer
 个人为学习图形学和熟悉固定管线流程,使用C#写的软光栅器，未考虑任何性能优化。在较为陌生的知识点上都标注了参考文献的链接。
 
-采用的是左手坐标系，Model/View/Perspective Projection矩阵。工程有VertexShader和FragmentShader两个类，但并不具备真正的Shader功能：
+采用的是左手坐标系，Model/View/Perspective Projection矩阵。代码里有VertexShader和FragmentShader两个类，但并不具备真正的Shader功能：
 * VertexShader仅完成顶点变换。
-* FragmentShader仅完成颜色拷贝（如果以后实现了光源的话，这里可能会尝试实现不同的光照方程）。
+* FragmentShader仅完成颜色拷贝（如果以后增加了光源，这里可能会尝试实现不同的光照方程）。
 
 ## 目前暂未实现
 裁剪<br>
@@ -25,4 +25,4 @@ RENDER_COLOR模式
 数字键2：切换到颜色模式。<br>
 
 ## 最重要的
-本人目前处在图形学的起步阶段，代码中肯定有各种错误（尤其是对知识点理解的错误），如果您发现了请一定给我发邮件不吝赐教：xieheng84@163.com，拜谢！
+本人目前处在图形学的初始学习阶段，代码中肯定有各种错误（尤其是对知识点理解的错误），如果您发现了请一定给我发邮件不吝赐教：xieheng84@163.com，拜谢！
