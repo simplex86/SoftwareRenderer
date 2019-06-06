@@ -5,24 +5,24 @@
 * VertexShader仅完成顶点变换。
 * FragmentShader仅完成颜色拷贝（如果以后实现了光源的话，这里可能会尝试实现不同的光照方程）。
 
-目前暂未实现：
-* 裁剪
-* 正交投影
-* 纹理
-* 法线变换
+## 目前暂未实现
+裁剪<br>
+正交投影<br>
+纹理<br>
+法线变换<br>
 
-效果<br>
-* RENDER_WIREFRAME模式
+## 效果
+RENDER_WIREFRAME模式
 ![RENDER_WIREFRAME模式](https://github.com/xieheng/SoftwareRenderer/blob/master/image_render_wireframe.png)
 
-* RENDER_COLOR模式
+RENDER_COLOR模式
 ![RENDER_COLOR模式](https://github.com/xieheng/SoftwareRenderer/blob/master/image_render_color.png)
 
+## 控制
+方向键左/右：旋转物体。<br>
+方向键上/下：拉动相机。<br>
+数字键1：切换到线框模式。<br>
+数字键2：切换到颜色模式。<br>
 
-* 方向键左/右：旋转物体。
-* 方向键上/下：拉动相机。
-* 数字键1：切换到线框模式。
-* 数字键2：切换到颜色模式。
-
-最重要的<br>
+## 最重要的
 本人目前处在图形学的起步阶段，代码中肯定有各种错误（尤其是对知识点理解的错误），如果您发现了请一定给我发邮件不吝赐教：xieheng84@163.com，拜谢！
