@@ -6,17 +6,17 @@
 * FragmentShader仅完成颜色拷贝（如果以后实现了光源的话，这里可能会尝试实现不同的光照方程）。
 
 目前暂未实现：
-1、 裁剪
-2、 正交投影
-3、 纹理
-4、 法线变换
+* 裁剪
+* 正交投影
+* 纹理
+* 法线变换
 
 效果
 
-RENDER_WIREFRAME模式
+*RENDER_WIREFRAME模式
 ![RENDER_WIREFRAME模式](https://github.com/xieheng/SoftwareRenderer/blob/master/image_render_wireframe.png)
 
-RENDER_COLOR模式
+*RENDER_COLOR模式
 ![RENDER_COLOR模式](https://github.com/xieheng/SoftwareRenderer/blob/master/image_render_color.png)
 
 方向键左/右：旋转物体。
