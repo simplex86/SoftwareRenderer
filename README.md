@@ -12,6 +12,7 @@
 4、 法线变换
 
 效果
+
 RENDER_WIREFRAME模式
 ![RENDER_WIREFRAME模式](https://github.com/xieheng/SoftwareRenderer/blob/master/image_render_wireframe.png)
 
