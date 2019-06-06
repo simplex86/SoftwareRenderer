@@ -12,8 +12,10 @@
 4、 法线变换
 
 效果
+RENDER_WIREFRAME模式
 ![RENDER_WIREFRAME模式](https://github.com/xieheng/SoftwareRenderer/blob/master/image_render_wireframe.png)
 
+RENDER_COLOR模式
 ![RENDER_COLOR模式](https://github.com/xieheng/SoftwareRenderer/blob/master/image_render_color.png)
 
 方向键左/右：旋转物体。
