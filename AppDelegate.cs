@@ -59,7 +59,7 @@ namespace SoftwareRenderer
         void OnCameraPostRender(Canvas canvas)
         {
             //显示帧率
-            canvas.DrawString(string.Format("FPS: {0}", _fps),
+            canvas.DrawString(string.Format("FPS: {0:F1}", _fps),
                               _font,
                               Brushes.Black);
         }
@@ -91,6 +91,15 @@ namespace SoftwareRenderer
             {
                 _cameraPosForward -= 0.1f;
                 _camera.position = new Vector4(0, 0, _cameraPosForward);
+            }
+
+            if (e.KeyCode == Keys.D1)//切换到线框模式
+            {
+                _camera.renderType = Camera.RenderType.WIREFRAME;
+            }
+            else if (e.KeyCode == Keys.D2)//切换到颜色模式
+            {
+                _camera.renderType = Camera.RenderType.COLOR;
             }
         }
     }
