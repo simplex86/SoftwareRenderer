@@ -11,18 +11,18 @@
 * 纹理
 * 法线变换
 
-效果
-
-*RENDER_WIREFRAME模式
+效果<br>
+* RENDER_WIREFRAME模式
 ![RENDER_WIREFRAME模式](https://github.com/xieheng/SoftwareRenderer/blob/master/image_render_wireframe.png)
 
-*RENDER_COLOR模式
+* RENDER_COLOR模式
 ![RENDER_COLOR模式](https://github.com/xieheng/SoftwareRenderer/blob/master/image_render_color.png)
 
-方向键左/右：旋转物体。
-方向键上/下：拉动相机。
-数字键1：切换到线框模式。
-数字键2：切换到颜色模式。
 
-最重要的
+* 方向键左/右：旋转物体。
+* 方向键上/下：拉动相机。
+* 数字键1：切换到线框模式。
+* 数字键2：切换到颜色模式。
+
+最重要的<br>
 本人目前处在图形学的起步阶段，代码中肯定有各种错误（尤其是对知识点理解的错误），如果您发现了请一定给我发邮件不吝赐教：xieheng84@163.com，拜谢！
