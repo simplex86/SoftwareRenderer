@@ -8,8 +8,15 @@ namespace SoftwareRenderer
     {
         public enum RenderType
         {
-            WIREFRAME,
-            COLOR,
+            Wireframe,
+            Color,
+        }
+
+        public enum CullType
+        {
+            None,
+            Back,
+            Front,
         }
 
         private Vector4 _position = Vector4.zero;
@@ -18,15 +25,15 @@ namespace SoftwareRenderer
         private float _fov = 90.0f;
         private float _near = 0.1f;
         private float _far = 100;
-        private RenderType _renderType = RenderType.WIREFRAME;
+        private RenderType _renderType = RenderType.Color;
+        private CullType _cullType = CullType.Back;
         private bool _dirty = false;
         private CanvasBuffer _gbuffer = new CanvasBuffer(Screen.WIDTH, Screen.HEIGHT);
         private Matrix4x4 _worldToCameraMatrix;
         private Matrix4x4 _projectionMatrix;
         private VertexShader _vertexShader = new VertexShader();
-        private Rasterizer _raster = new WireframeBresenhamRasterizer();
+        private Rasterizer _raster = new TriangleStandardRasterizer();
         private FragmentShader _fragmentShader = new FragmentShader();
-        //private float[, ] _zbuffer = new float[Screen.WIDTH, Screen.HEIGHT];
         private FrameBuffer _frameBuffer = new FrameBuffer(Screen.WIDTH, Screen.HEIGHT);
 
         public Camera()
@@ -116,6 +123,13 @@ namespace SoftwareRenderer
         }
 
         public float aspect { get; private set; }
+
+        public CullType cullType
+        {
+            set { _cullType = value; }
+            get { return _cullType; }
+        }
+
         public RenderType renderType 
         { 
             set
@@ -124,11 +138,11 @@ namespace SoftwareRenderer
                 {
                     _renderType = value;
 
-                    if (_renderType == RenderType.WIREFRAME)
+                    if (_renderType == RenderType.Wireframe)
                     {
                         _raster = new WireframeBresenhamRasterizer();
                     }
-                    else if (_renderType == RenderType.COLOR)
+                    else if (_renderType == RenderType.Color)
                     {
                         _raster = new TriangleStandardRasterizer();
                     }
@@ -187,13 +201,16 @@ namespace SoftwareRenderer
             Matrix4x4 mvp = mesh.modelToWorldMatrix * _worldToCameraMatrix * _projectionMatrix;
             foreach (Triangle t in mesh.triangles)
             {
-                Vertex a = GetVertex(mesh, t.a.vertex, t.a.color, t.a.uv);
-                Vertex b = GetVertex(mesh, t.b.vertex, t.b.color, t.b.uv);
-                Vertex c = GetVertex(mesh, t.c.vertex, t.c.color, t.c.uv);
+                Vertex a = GetVertex(mesh, t.a);
+                Vertex b = GetVertex(mesh, t.b);
+                Vertex c = GetVertex(mesh, t.c);
 
-                //背面剔除
-                if (CullBackface(a.position, b.position, c.position, mesh.modelToWorldMatrix))
+                //剔除面
+                bool cull = CullFaces(a.position, b.position, c.position, mesh.modelToWorldMatrix);
+                if (cull)
+                {
                     continue;
+                }
 
                 //执行vertexShader
                 a = _vertexShader.Do(a, mvp);
@@ -221,50 +238,55 @@ namespace SoftwareRenderer
                 //光栅化
                 List<Fragment> fragments = _raster.Do(a, b, c);
 
-                //执行fragmentShader并修改frameBuffer
-                foreach (Fragment fragment in fragments)
+                //修改framebuffer
+                if (_renderType == RenderType.Wireframe)
                 {
-                    Fragment fg = _fragmentShader.Do(fragment);
-
-                    if (fg.depth < _frameBuffer.zbuffer[fg.x, fg.y])
+                    foreach (Fragment fragment in fragments)
                     {
-                        _frameBuffer.zbuffer[fg.x, fg.y] = fg.depth;
-                        _frameBuffer.cbuffer[fg.x, fg.y] = fg.color;
+                        _frameBuffer.SetColor(fragment.x, fragment.y, Color4.black);
                     }
                 }
-
-                //渲染到屏幕
-                foreach (Fragment fragment in fragments)
+                else if (_renderType == RenderType.Color)
                 {
-                    int    x     = fragment.x;
-                    int    y     = fragment.y;
-                    float  z     = fragment.depth;
-                    Color4 color = (_renderType == RenderType.WIREFRAME) ? Color4.black : 
-                                                                           _frameBuffer.cbuffer[x, y];
+                    foreach (Fragment fragment in fragments)
+                    {
+                        Fragment fg = _fragmentShader.Do(fragment);
 
-                    _gbuffer.foreground.DrawPoint(new Vector4(x, y, z, 0), color);
+                        if (fg.depth < _frameBuffer.GetDepth(fg.x, fg.y))
+                        {
+                            _frameBuffer.SetDepth(fg.x, fg.y, fg.depth);
+                            _frameBuffer.SetColor(fg.x, fg.y, fg.color);
+                        }
+                    }
                 }
-
-                _frameBuffer.Clear();
             }
+
+            //渲染到屏幕
+            _gbuffer.foreground.RenderByFrameBuffer(_frameBuffer);
+
+            //清空frameBuffer
+            _frameBuffer.Clear();
         }
 
-        private Vertex GetVertex(Mesh mesh, int vertex, int color, int uv)
+        private Vertex GetVertex(Mesh mesh, Triangle.Index idx)
         {
             Vertex v = new Vertex();
-            v.position = mesh.vertics[vertex];
-            v.color = mesh.colors[color];
+            v.position = mesh.vertics[idx.vertex];
+            v.color = mesh.colors[idx.color];
 
             if (mesh.uvs.Count > 0)
             {
-                v.uv = mesh.uvs[uv];
+                v.uv = mesh.uvs[idx.uv];
             }
 
             return v;
         }
 
-        private bool CullBackface(Vector4 a, Vector4 b, Vector4 c, Matrix4x4 modelToWorldMatrix)
+        private bool CullFaces(Vector4 a, Vector4 b, Vector4 c, Matrix4x4 modelToWorldMatrix)
         {
+            if (_cullType == CullType.None)
+                return false;
+
             a *= modelToWorldMatrix;
             b *= modelToWorldMatrix;
             c *= modelToWorldMatrix;
@@ -272,7 +294,8 @@ namespace SoftwareRenderer
             Vector4 d = _direction;
             Vector4 n = Vector4.Cross(b - a, c - a);
 
-            return (n.z >= 0.0f) || (Vector4.Dot(n, d) >= 0.0f);
+            return (_cullType == CullType.Back) ? (n.z > 0.0f) || (Vector4.Dot(n, d) >= 0.0f)
+                                                : (n.z < 0.0f) && (Vector4.Dot(n, d) < 0.0f);
         }
 
         private void Clip(Vertex a, Vertex b, Vertex c)

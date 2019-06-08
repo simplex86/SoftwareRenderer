@@ -21,10 +21,11 @@ namespace SoftwareRenderer
             _form = new Form();
             _form.Size = new Size(Screen.WIDTH, Screen.HEIGHT);
             _form.StartPosition = FormStartPosition.CenterScreen;
-            _form.Text = "SoftwareRenderer by XieHeng";
             _form.KeyDown += OnFormKeyDown;
 
             _camera.OnPostRender += OnCameraPostRender;
+
+            UpdateWindowTitle();
         }
 
         public void Run()
@@ -32,7 +33,6 @@ namespace SoftwareRenderer
             _camera.position = new Vector4(0, 0, _cameraPosForward);
             _camera.fov = 90;
             _camera.LookAt(new Vector4(0.0f, -0.5f, 0.2f), Vector4.up);
-            _camera.renderType = Camera.RenderType.COLOR;
 
             Model model = new Pyramid();
             _meshes.Add(model.mesh);
@@ -95,12 +95,56 @@ namespace SoftwareRenderer
 
             if (e.KeyCode == Keys.D1)//切换到线框模式
             {
-                _camera.renderType = Camera.RenderType.WIREFRAME;
+                _camera.renderType = Camera.RenderType.Wireframe;
             }
             else if (e.KeyCode == Keys.D2)//切换到颜色模式
             {
-                _camera.renderType = Camera.RenderType.COLOR;
+                _camera.renderType = Camera.RenderType.Color;
             }
+
+            if (e.KeyCode == Keys.D0)//不剔除
+            {
+                _camera.cullType = Camera.CullType.None;
+            }
+            else if (e.KeyCode == Keys.D8)//剔除背面
+            {
+                _camera.cullType = Camera.CullType.Back;
+            }
+            else if (e.KeyCode == Keys.D9)//剔除正面
+            {
+                _camera.cullType = Camera.CullType.Front;
+            }
+
+            UpdateWindowTitle();
+        }
+
+        private void UpdateWindowTitle()
+        {
+            string title = "SoftwareRenderer | ";
+
+            if (_camera.cullType == Camera.CullType.None)
+            {
+                title += "不剔除 | ";
+            }
+            else if (_camera.cullType == Camera.CullType.Front)
+            {
+                title += "剔除正面 | ";
+            }
+            else if (_camera.cullType == Camera.CullType.Back)
+            {
+                title += "剔除背面 | ";
+            }
+
+            if (_camera.renderType == Camera.RenderType.Wireframe)
+            {
+                title += "线框渲染";
+            }
+            else if (_camera.renderType == Camera.RenderType.Color)
+            {
+                title += "颜色渲染";
+            }
+
+            _form.Text = title;
         }
     }
 }

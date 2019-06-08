@@ -141,7 +141,7 @@ namespace SoftwareRenderer
                 for (int y = (int)pc.y; y >= (int)pa.y; y--)
                 {
                     float sz = LerpZ(pc.y, pb.y, y, pc.z, pb.z);
-                    float ez = LerpZ(pc.y, pa.y, y,pc.z, pa.z);
+                    float ez = LerpZ(pc.y, pa.y, y, pc.z, pa.z);
 
                     ScanLine((int)x_cb, (int)x_ca, y, sz, ez);
                     x_ca -= invslope_ca;

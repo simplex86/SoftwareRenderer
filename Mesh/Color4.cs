@@ -4,81 +4,88 @@ namespace SoftwareRenderer
 {
     struct Color4
     {
-        private float _r;
-        private float _g;
-        private float _b;
-        private float _a;
+        private byte _r;
+        private byte _g;
+        private byte _b;
+        private byte _a;
 
-        public Color4(float r, float g, float b, float a = 1)
-            : this()
+        public Color4(byte r, byte g, byte b, byte a = 255)
         {
-            this.r = r;
-            this.g = g;
-            this.b = b;
-            this.a = a;
+            _r = r;
+            _g = g;
+            _b = b;
+            _a = a;
         }
 
         public Color4(Color c)
-            : this()
         {
-            r = c.R / 255f;
-            g = c.G / 255f;
-            b = c.B / 255f;
-            a = c.A / 255f;
+            _r = c.R;
+            _g = c.G;
+            _b = c.B;
+            _a = c.A;
         }
 
-        public float r
+        public Color4(Color4 c)
         {
-            set { _r = Mathf.Clamp01(value); }
+            _r = c.r;
+            _g = c.g;
+            _b = c.b;
+            _a = c.a;
+        }
+
+        public byte r
+        {
+            set { _r = (byte)Mathf.Clamp(value, 0, 255); }
             get { return _r; }
         }
 
-        public float g
+        public byte g
         {
-            set { _g = Mathf.Clamp01(value); }
+            set { _g = (byte)Mathf.Clamp(value, 0, 255); }
             get { return _g; }
         }
 
-        public float b
+        public byte b
         {
-            set { _b = Mathf.Clamp01(value); }
+            set { _b = (byte)Mathf.Clamp(value, 0, 255); }
             get { return _b; }
         }
 
-        public float a
+        public byte a
         {
-            set { _a = Mathf.Clamp01(value); }
+            set { _a = (byte)Mathf.Clamp(value, 0, 255); }
             get { return _a; }
         }
 
         public static Color4 operator *(Color4 c, float t)
         {
-            return new Color4(c.r * t, c.g * t, c.b * t, c.a * t);
+            return new Color4((byte)(c.r * t), 
+                              (byte)(c.g * t), 
+                              (byte)(c.b * t), 
+                              (byte)(c.a * t));
         }
 
         public static Color4 operator +(Color4 a, Color4 b)
         {
-            return new Color4(a.r + b.r, a.g + b.g, a.b + b.b, a.a + b.a);
+            return new Color4((byte)(a.r + b.r),
+                              (byte)(a.g + b.g),
+                              (byte)(a.b + b.b),
+                              (byte)(a.a + b.a));
         }
 
         public static Color4 Lerp(Color4 ca, Color4 cb, float t)
         {
-            float r = Mathf.Lerp(ca.r, cb.r, t);
-            float g = Mathf.Lerp(ca.g, cb.g, t);
-            float b = Mathf.Lerp(ca.b, cb.b, t);
-            float a = Mathf.Lerp(ca.a, cb.a, t);
+            byte r = (byte)Mathf.Lerp(ca.r, cb.r, t);
+            byte g = (byte)Mathf.Lerp(ca.g, cb.g, t);
+            byte b = (byte)Mathf.Lerp(ca.b, cb.b, t);
+            byte a = (byte)Mathf.Lerp(ca.a, cb.a, t);
 
             return new Color4(r, g, b, a);
         }
 
         public static implicit operator Color(Color4 c)
         {
-            int r = (int)(c.r * 255);
-            int g = (int)(c.g * 255);
-            int b = (int)(c.b * 255);
-            int a = (int)(c.a * 255);
-
-            return Color.FromArgb(a, r, g, b);
+            return Color.FromArgb(c.a, c.r, c.g, c.b);
         }
 
         public static Color4 white

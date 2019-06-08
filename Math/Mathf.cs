@@ -79,5 +79,10 @@ namespace SoftwareRenderer
             t = Clamp01(t);
             return a + (b - a) * t;
         }
+
+        public static float Inverse(float a)
+        {
+            return Mathf.Eq(a, 0.0f) ? 0.0f : 1.0f / a;
+        }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace SoftwareRenderer
 {
@@ -17,6 +19,15 @@ namespace SoftwareRenderer
         public void DrawPoint(Vector4 p, Color4 color)
         {
             _bitmap.SetPixel((int)p.x, (int)p.y, color);
+        }
+
+        public void RenderByFrameBuffer(FrameBuffer frameBuffer)
+        {
+            BitmapData bits = _bitmap.LockBits(new Rectangle(0, 0, _bitmap.Width, _bitmap.Height),
+                                               ImageLockMode.WriteOnly,
+                                               _bitmap.PixelFormat);
+            Marshal.Copy(frameBuffer.cbuffer, 0, bits.Scan0, frameBuffer.cbuffer.Length);
+            _bitmap.UnlockBits(bits);
         }
 
         public void DrawString(string text, Font font, Brush brush, float x = 0, float y = 0)

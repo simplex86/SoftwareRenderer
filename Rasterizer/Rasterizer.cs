@@ -15,7 +15,11 @@ namespace SoftwareRenderer
             if (Mathf.Eq(e, s))
                 return sz;
 
-            return Mathf.Lerp(sz, ez, (x - s) / (e - s));
+            sz = Mathf.Inverse(sz);
+            ez = Mathf.Inverse(ez);
+
+            float z = Mathf.Lerp(sz, ez, (x - s) / (e - s));
+            return Mathf.Inverse(z);
         }
     }
 }
