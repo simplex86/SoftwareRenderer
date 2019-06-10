@@ -68,10 +68,8 @@
     <Compile Include="Rasterizer\Rasterizer.cs" />
     <Compile Include="Rasterizer\TriangleRasterizer\TriangleBarycentricRasterizer.cs" />
     <Compile Include="Rasterizer\TriangleRasterizer\TriangleBresenhamRasterizer.cs" />
-    <Compile Include="Rasterizer\TriangleRasterizer\TriangleRasterizer.cs" />
     <Compile Include="Rasterizer\TriangleRasterizer\TriangleStandardRasterizer.cs" />
     <Compile Include="Rasterizer\WireframeRasterizer\WireframeBresenhamRasterizer.cs" />
-    <Compile Include="Rasterizer\WireframeRasterizer\WireframeRasterizer.cs" />
     <Compile Include="Screen.cs" />
     <Compile Include="Shader\FragmentShader.cs" />
     <Compile Include="Shader\VertexShader.cs" />

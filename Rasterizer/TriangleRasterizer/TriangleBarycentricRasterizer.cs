@@ -25,7 +25,7 @@ namespace SoftwareRenderer
     /// 
     /// 实践表明，实现简单但是性能很差！！！！！！！！！
     /// </summary>
-    class TriangleBarycentricRasterizer : TriangleRasterizer
+    class TriangleBarycentricRasterizer : Rasterizer
     {
         public override List<Fragment> Do(Vertex a, Vertex b, Vertex c)
         {
@@ -54,15 +54,38 @@ namespace SoftwareRenderer
 
                     if ((s >= 0) && (t >= 0) && (s + t <= 1))
                     {
-                        //TODO 还需要完成z和uv的插值
-                        Fragment fg = new Fragment(x, y);
+                        Fragment fg = GetFragment(a, b, c, x, y);
                         _fragments.Add(fg);
                     }
                 }
             }
-            Color(a, b, c);
 
             return _fragments;
+        }
+
+        protected Fragment GetFragment(Vertex a, Vertex b, Vertex c, int x, int y)
+        {
+            Vector4 pa = a.position;
+            Vector4 pb = b.position;
+            Vector4 pc = c.position;
+
+            float z = float.MaxValue;//TODO 插值
+            float s = 1 / GetTriangleArea(pa, pb, pc);
+            Vector4 pt = new Vector4(x, y, z);
+
+            float s1 = GetTriangleArea(pt, pa, pb) * s;
+            float s2 = GetTriangleArea(pt, pb, pc) * s;
+            float s3 = GetTriangleArea(pt, pc, pa) * s;
+
+            Color4 cc = a.color * s2 + b.color * s3 + c.color * s1;
+            //TODO 还需要完成uv的插值
+
+            return new Fragment(x, y, z, cc);
+        }
+
+        private float GetTriangleArea(Vector4 a, Vector4 b, Vector4 c)
+        {
+            return Mathf.Abs(Vector4.Cross(a - b, a - c).z);
         }
     }
 }

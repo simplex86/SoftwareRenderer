@@ -23,7 +23,7 @@ namespace SoftwareRenderer
     /// 参考文献：
     /// Standard Algorithm - http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html#algo1
     /// </summary>
-    class TriangleStandardRasterizer : TriangleRasterizer
+    class TriangleStandardRasterizer : Rasterizer
     {
         public override List<Fragment> Do(Vertex a, Vertex b, Vertex c)
         {
@@ -50,12 +50,13 @@ namespace SoftwareRenderer
 
                 Vertex m = new Vertex();
                 m.position = new Vector4(x, y, 1 / z);
+                float t = Mathf.Eq(0.0f, pb.y - pa.y) ? 1.0f : (y - pa.y) / (pb.y - pa.y);
+                m.color = Color4.Lerp(a.color, c.color, t);
                 m.uv = c.uv;//TODO 插值得到
 
                 RasterizeBottomTriangle(a, b, m);
                 RasterizeTopTriangle(b, m, c);
             }
-            Color(a, b, c);
 
             return _fragments;
         }
@@ -130,8 +131,14 @@ namespace SoftwareRenderer
                 {
                     float sz = LerpZ(pc.y, pa.y, y, pc.z, pa.z);
                     float ez = LerpZ(pc.y, pb.y, y, pc.z, pb.z);
+                    int sx = (int)x_ca;
+                    int ex = (int)x_cb;
+                    float t1 = Mathf.Eq(0.0f, pa.y - pc.y) ? 1.0f : (y - pc.y) / (pa.y - pc.y);
+                    float t2 = Mathf.Eq(0.0f, pb.y - pc.y) ? 1.0f : (y - pc.y) / (pb.y - pc.y);
+                    Color4 sc = Color4.Lerp(c.color, a.color, t1);
+                    Color4 ec = Color4.Lerp(c.color, b.color, t2);
 
-                    ScanLine((int)x_ca, (int)x_cb, y, sz, ez);
+                    ScanLine(sx, ex, y, sz, ez, sc, ec);
                     x_ca -= invslope_ca;
                     x_cb -= invslope_cb;
                 }
@@ -142,8 +149,14 @@ namespace SoftwareRenderer
                 {
                     float sz = LerpZ(pc.y, pb.y, y, pc.z, pb.z);
                     float ez = LerpZ(pc.y, pa.y, y, pc.z, pa.z);
+                    int sx = (int)x_cb;
+                    int ex = (int)x_ca;
+                    float t1 = Mathf.Eq(0.0f, pb.y - pc.y) ? 1.0f : (y - pc.y) / (pb.y - pc.y);
+                    float t2 = Mathf.Eq(0.0f, pa.y - pc.y) ? 1.0f : (y - pc.y) / (pa.y - pc.y);
+                    Color4 sc = Color4.Lerp(c.color, b.color, t1);
+                    Color4 ec = Color4.Lerp(c.color, a.color, t2);
 
-                    ScanLine((int)x_cb, (int)x_ca, y, sz, ez);
+                    ScanLine(sx, ex, y, sz, ez, sc, ec);
                     x_ca -= invslope_ca;
                     x_cb -= invslope_cb;
                 }
@@ -166,10 +179,16 @@ namespace SoftwareRenderer
             {
                 for (int y = (int)pa.y; y <= (int)pb.y; y++)
                 {
+                    int sx = (int)x_ab;
+                    int ex = (int)x_ac;
                     float sz = LerpZ(pa.y, pb.y, y, pa.z, pb.z);
                     float ez = LerpZ(pa.y, pc.y, y, pa.z, pc.z);
+                    float t1 = Mathf.Eq(0.0f, pb.y - pa.y) ? 1.0f : (y - pa.y) / (pb.y - pa.y);
+                    float t2 = Mathf.Eq(0.0f, pc.y - pa.y) ? 1.0f : (y - pa.y) / (pc.y - pa.y);
+                    Color4 sc = Color4.Lerp(a.color, b.color, t1);
+                    Color4 ec = Color4.Lerp(a.color, c.color, t2);
 
-                    ScanLine((int)x_ab, (int)x_ac, y, sz, ez);
+                    ScanLine(sx, ex, y, sz, ez, sc, ec);
                     x_ab += invslope_ab;
                     x_ac += invslope_ac;
                 }
@@ -178,23 +197,31 @@ namespace SoftwareRenderer
             {
                 for (int y = (int)pa.y; y <= (int)pb.y; y++)
                 {
+                    int sx = (int)x_ac;
+                    int ex = (int)x_ab;
                     float sz = LerpZ(pa.y, pc.y, y, pa.z, pc.z);
                     float ez = LerpZ(pa.y, pb.y, y, pa.z, pb.z);
+                    float t1 = Mathf.Eq(0.0f, pc.y - pa.y) ? 1.0f : (y - pa.y) / (pc.y - pa.y);
+                    float t2 = Mathf.Eq(0.0f, pb.y - pa.y) ? 1.0f : (y - pa.y) / (pb.y - pa.y);
+                    Color4 sc = Color4.Lerp(a.color, c.color, t1);
+                    Color4 ec = Color4.Lerp(a.color, b.color, t2);
 
-                    ScanLine((int)x_ac, (int)x_ab, y, sz, ez);
+                    ScanLine(sx, ex, y, sz, ez, sc, ec);
                     x_ab += invslope_ab;
                     x_ac += invslope_ac;
                 }
             }
         }
 
-        private void ScanLine(int sx, int ex, int y, float sz, float ez)
+        private void ScanLine(int sx, int ex, int y, float sz, float ez, Color4 ca, Color4 cb)
         {
             for (int x = sx; x <= ex; x++)
             {
-                float iz = LerpZ(sx, ex, x, sz, ez);
+                float z = LerpZ(sx, ex, x, sz, ez);
+                float t = (ex - sx == 0) ? 1.0f : (x - sx) / (float)(ex - sx);
+                Color4 c = Color4.Lerp(ca, cb, t);
                 //TODO 还需要完成uv的插值
-                Fragment fg = new Fragment(x, y, iz);
+                Fragment fg = new Fragment(x, y, z, c);
                 _fragments.Add(fg);
             }
         }

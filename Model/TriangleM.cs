@@ -9,8 +9,8 @@ namespace SoftwareRenderer
         {
             List<Vector4> vertics = mesh.vertics;
             vertics.Add(new Vector4(0,  1,  0));
-            vertics.Add(new Vector4(1, -1,  1));
-            vertics.Add(new Vector4(1, -1, -1));
+            vertics.Add(new Vector4(1, -1,  0));
+            vertics.Add(new Vector4(-1, -1, 0));
 
             List<Color4> colors = mesh.colors;
             colors.Add(Color4.red);
