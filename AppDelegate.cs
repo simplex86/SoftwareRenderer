@@ -84,13 +84,22 @@ namespace SoftwareRenderer
             }
             else if (e.KeyCode == Keys.Up)//拉近
             {
-                _cameraPosForward += 0.1f;
+                _cameraPosForward += 0.05f;
                 _camera.position = new Vector4(0, 0, _cameraPosForward);
             }
             else if (e.KeyCode == Keys.Down)//推远
             {
-                _cameraPosForward -= 0.1f;
+                _cameraPosForward -= 0.05f;
                 _camera.position = new Vector4(0, 0, _cameraPosForward);
+            }
+
+            if (e.KeyCode == Keys.O)//正交相机
+            {
+                _camera.cameraType = Camera.CameraType.Orthogonal;
+            }
+            else if (e.KeyCode == Keys.P)//透视相机
+            {
+                _camera.cameraType = Camera.CameraType.Perspective;
             }
 
             if (e.KeyCode == Keys.D1)//切换到线框模式

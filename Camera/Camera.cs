@@ -6,6 +6,12 @@ namespace SoftwareRenderer
 {
     class Camera
     {
+        public enum CameraType
+        {
+            Orthogonal,
+            Perspective,
+        }
+
         public enum RenderType
         {
             Wireframe,
@@ -25,6 +31,7 @@ namespace SoftwareRenderer
         private float _fov = 90.0f;
         private float _near = 0.1f;
         private float _far = 100;
+        private CameraType _cameraType = CameraType.Perspective;
         private RenderType _renderType = RenderType.Color;
         private CullType _cullType = CullType.Back;
         private bool _dirty = false;
@@ -124,6 +131,16 @@ namespace SoftwareRenderer
 
         public float aspect { get; private set; }
 
+        public CameraType cameraType
+        {
+            set 
+            {
+                _cameraType = value;
+                _dirty = true;
+            }
+            get { return _cameraType; }
+        }
+
         public CullType cullType
         {
             set { _cullType = value; }
@@ -157,7 +174,7 @@ namespace SoftwareRenderer
         {
             _dirty = false;
             _worldToCameraMatrix = GetCameraMatrix();
-            _projectionMatrix = GetPerspectiveMatrix();
+            _projectionMatrix = GetProjectionMatrix();
         }
 
         private Matrix4x4 GetCameraMatrix()
@@ -179,6 +196,12 @@ namespace SoftwareRenderer
             return matrix;
         }
 
+        private Matrix4x4 GetProjectionMatrix()
+        {
+            return (_cameraType == CameraType.Perspective) ? GetPerspectiveMatrix() 
+                                                           : GetOrthogonalMatrix();
+        }
+
         private Matrix4x4 GetPerspectiveMatrix()
         {
             Matrix4x4 m = Matrix4x4.zero;
@@ -189,6 +212,20 @@ namespace SoftwareRenderer
             m[2, 2] = far / (far - near);
             m[3, 2] = (near * far) / (near - far);
             m[2, 3] = 1.0f;
+
+            return m;
+        }
+
+        private Matrix4x4 GetOrthogonalMatrix()
+        {
+            Matrix4x4 m = Matrix4x4.zero;
+            float fax = near / Mathf.Tan(Mathf.Deg2Rad(_fov * 0.5f));
+
+            m[0, 0] = fax / aspect; 
+            m[1, 1] = fax;
+            m[2, 2] = 1.0f / (far - near);
+            m[3, 2] = near / (near - far);
+            m[3, 3] = 1.0f;
 
             return m;
         }
