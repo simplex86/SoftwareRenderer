@@ -29,5 +29,15 @@ namespace SoftwareRenderer
             float t = Mathf.Eq(0.0f, ev - sv) ? 1.0f : (tv - sv) / (ev - sv);
             return Color4.Lerp(ca, cb, t);
         }
+
+        protected TexCoord LerpUV(TexCoord a, TexCoord b, 
+                                  float su, float eu, float tu,
+                                  float sv, float ev, float tv)
+        {
+            float u = Mathf.Eq(0.0f, eu - su) ? 1.0f : (tu - su) / (eu - su);
+            float v = Mathf.Eq(0.0f, ev - sv) ? 1.0f : (tv - sv) / (ev - sv);
+
+            return TexCoord.Lerp(a, b, u, v);
+        }
     }
 }

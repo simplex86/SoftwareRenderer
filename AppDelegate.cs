@@ -9,20 +9,24 @@ namespace SoftwareRenderer
     class AppDelegate
     {
         private Form _form = null;
-        private Camera _camera = new Camera();
+        private Camera _camera = null;
         private float _cameraPosForward = -3;
         private float _fps = 30.0f;
         private Font _font = new Font("Courier New", 12);
         private List<Mesh> _meshes = new List<Mesh>();
         private float _meshRotationUp = 0;
+
+        private const int WIDTH  = 800;
+        private const int HEIGHT = 600;
         
         public AppDelegate()
         {
             _form = new Form();
-            _form.Size = new Size(Screen.WIDTH, Screen.HEIGHT);
+            _form.Size = new Size(WIDTH, HEIGHT);
             _form.StartPosition = FormStartPosition.CenterScreen;
             _form.KeyDown += OnFormKeyDown;
 
+            _camera = new Camera(WIDTH, HEIGHT);
             _camera.OnPostRender += OnCameraPostRender;
 
             UpdateWindowTitle();
@@ -130,6 +134,15 @@ namespace SoftwareRenderer
         private void UpdateWindowTitle()
         {
             string title = "SoftwareRenderer | ";
+
+            if (_camera.cameraType == Camera.CameraType.Orthogonal)
+            {
+                title += "正交相机 | ";
+            }
+            else if (_camera.cameraType == Camera.CameraType.Perspective)
+            {
+                title += "透视相机 | ";
+            }
 
             if (_camera.cullType == Camera.CullType.None)
             {

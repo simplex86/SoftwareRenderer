@@ -8,23 +8,26 @@ namespace SoftwareRenderer
     {
         public enum CameraType
         {
-            Orthogonal,
-            Perspective,
+            Orthogonal, //正交
+            Perspective,//透视
         }
 
         public enum RenderType
         {
-            Wireframe,
-            Color,
+            Wireframe,//相框
+            Color,    //彩色
         }
 
         public enum CullType
         {
-            None,
-            Back,
-            Front,
+            None, //不剔除
+            Back, //剔除背面
+            Front,//剔除正面
         }
 
+        private int _width = 800;
+        private int _height = 600;
+        private float _aspect = 1.333f;
         private Vector4 _position = Vector4.zero;
         private Vector4 _direction = Vector4.forward;
         private Vector4 _up = Vector4.up;
@@ -35,17 +38,23 @@ namespace SoftwareRenderer
         private RenderType _renderType = RenderType.Color;
         private CullType _cullType = CullType.Back;
         private bool _dirty = false;
-        private CanvasBuffer _gbuffer = new CanvasBuffer(Screen.WIDTH, Screen.HEIGHT);
+        private CanvasBuffer _gbuffer = null;
         private Matrix4x4 _worldToCameraMatrix;
         private Matrix4x4 _projectionMatrix;
         private VertexShader _vertexShader = new VertexShader();
         private Rasterizer _raster = new TriangleStandardRasterizer();
         private FragmentShader _fragmentShader = new FragmentShader();
-        private FrameBuffer _frameBuffer = new FrameBuffer(Screen.WIDTH, Screen.HEIGHT);
+        private FrameBuffer _frameBuffer = null;
 
-        public Camera()
+        public Camera(int width, int height)
         {
-            aspect = Screen.WIDTH / (float)Screen.HEIGHT;
+            _width = width;
+            _height = height;
+
+            _aspect = _width / (float)_height;
+            _gbuffer = new CanvasBuffer(_width, _height);
+            _frameBuffer = new FrameBuffer(_width, _height);
+
             _dirty = true;
         }
 
@@ -59,11 +68,7 @@ namespace SoftwareRenderer
         public void Render(Graphics grap, List<Mesh> meshes)
         {
             _gbuffer.foreground.Clear(Color4.white);
-
-            if (_dirty)
-            {
-                BuildMatrix();
-            }
+            BuildMatrix();
 
             foreach (Mesh mesh in meshes)
             {
@@ -129,8 +134,6 @@ namespace SoftwareRenderer
             get { return _far; }
         }
 
-        public float aspect { get; private set; }
-
         public CameraType cameraType
         {
             set 
@@ -172,9 +175,12 @@ namespace SoftwareRenderer
 
         private void BuildMatrix()
         {
-            _dirty = false;
-            _worldToCameraMatrix = GetCameraMatrix();
-            _projectionMatrix = GetProjectionMatrix();
+            if (_dirty)
+            {
+                _worldToCameraMatrix = GetCameraMatrix();
+                _projectionMatrix = GetProjectionMatrix();
+                _dirty = false;
+            }
         }
 
         private Matrix4x4 GetCameraMatrix()
@@ -207,7 +213,7 @@ namespace SoftwareRenderer
             Matrix4x4 m = Matrix4x4.zero;
             float fax = 1.0f / Mathf.Tan(Mathf.Deg2Rad(_fov * 0.5f));
 
-            m[0, 0] = fax / aspect;
+            m[0, 0] = fax / _aspect;
             m[1, 1] = fax;
             m[2, 2] = far / (far - near);
             m[3, 2] = (near * far) / (near - far);
@@ -221,7 +227,7 @@ namespace SoftwareRenderer
             Matrix4x4 m = Matrix4x4.zero;
             float fax = near / Mathf.Tan(Mathf.Deg2Rad(_fov * 0.5f));
 
-            m[0, 0] = fax / aspect; 
+            m[0, 0] = fax / _aspect; 
             m[1, 1] = fax;
             m[2, 2] = 1.0f / (far - near);
             m[3, 2] = near / (near - far);
@@ -266,8 +272,8 @@ namespace SoftwareRenderer
                 clip3.DivW();
 
                 //屏幕映射
-                float w = Screen.WIDTH * 0.5f;
-                float h = Screen.HEIGHT * 0.5f;
+                float w = _width * 0.5f;
+                float h = _height * 0.5f;
                 a.position = new Vector4(w * clip1.x + w, h - h * clip1.y, clip1.z);
                 b.position = new Vector4(w * clip2.x + w, h - h * clip2.y, clip2.z);
                 c.position = new Vector4(w * clip3.x + w, h - h * clip3.y, clip3.z);
@@ -331,8 +337,8 @@ namespace SoftwareRenderer
             Vector4 d = _direction;
             Vector4 n = Vector4.Cross(b - a, c - a);
 
-            return (_cullType == CullType.Back) ? (n.z > 0.0f) || (Vector4.Dot(n, d) >= 0.0f)
-                                                : (n.z < 0.0f) && (Vector4.Dot(n, d) < 0.0f);
+            return (_cullType == CullType.Back) ? Vector4.Dot(n, d) >= 0.0f
+                                                : Vector4.Dot(n, d) <  0.0f;
         }
 
         private void Clip(Vertex a, Vertex b, Vertex c)

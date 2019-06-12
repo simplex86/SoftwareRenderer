@@ -12,10 +12,10 @@
             this.v = v;
         }
 
-        public static TexCoord Lerp(TexCoord a, TexCoord b, float t)
+        public static TexCoord Lerp(TexCoord a, TexCoord b, float tu, float tv)
         {
-            float u = Mathf.Lerp(a.u, b.u, t);
-            float v = Mathf.Lerp(a.v, b.v, t);
+            float u = Mathf.Lerp(a.u, b.u, tu);
+            float v = Mathf.Lerp(a.v, b.v, tv);
 
             return new TexCoord(u, v);
         }
