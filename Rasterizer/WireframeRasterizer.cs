@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SoftwareRenderer
 {
-    class WireframeBresenhamRasterizer : Rasterizer
+    class WireframeRasterizer : Rasterizer
     {
         public override List<Fragment> Do(Vertex a, Vertex b, Vertex c)
         {

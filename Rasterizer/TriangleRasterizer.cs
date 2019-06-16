@@ -23,12 +23,20 @@ namespace SoftwareRenderer
     /// 参考文献：
     /// Standard Algorithm - http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html#algo1
     /// </summary>
-    class TriangleStandardRasterizer : Rasterizer
+    class TriangleRasterizer : Rasterizer
     {
+        private Vertex _a;
+        private Vertex _b;
+        private Vertex _c;
+
         public override List<Fragment> Do(Vertex a, Vertex b, Vertex c)
         {
             _fragments.Clear();
             Sort(ref a, ref b, ref c);
+
+            _a = a;
+            _b = b;
+            _c = c;
 
             if (Mathf.Eq(b.position.y, c.position.y))
             {
@@ -48,10 +56,7 @@ namespace SoftwareRenderer
                 float y = pb.y;
                 float z = LerpZ(pa.x, pc.x, x, pa.z, pb.z);
 
-                Vertex m = new Vertex();
-                m.position = new Vector4(x, y, z);
-                m.color = LerpC(a.color, c.color, pa.y, pb.y, y);
-                m.uv = c.uv;//TODO 插值得到
+                Vertex m = new Vertex { position = new Vector4(x, y, z) };
 
                 RasterizeBottomTriangle(a, b, m);
                 RasterizeTopTriangle(b, m, c);
@@ -132,10 +137,8 @@ namespace SoftwareRenderer
                     float ez = LerpZ(pc.y, pb.y, y, pc.z, pb.z);
                     int sx = (int)x_ca;
                     int ex = (int)x_cb;
-                    Color4 sc = LerpC(c.color, a.color, pc.y, pa.y, y);
-                    Color4 ec = LerpC(c.color, b.color, pc.y, pb.y, y);
 
-                    ScanLine(sx, ex, y, sz, ez, sc, ec);
+                    ScanLine(sx, ex, y, sz, ez);
                     x_ca -= invslope_ca;
                     x_cb -= invslope_cb;
                 }
@@ -148,10 +151,8 @@ namespace SoftwareRenderer
                     float ez = LerpZ(pc.y, pa.y, y, pc.z, pa.z);
                     int sx = (int)x_cb;
                     int ex = (int)x_ca;
-                    Color4 sc = LerpC(c.color, b.color, pc.y, pb.y, y);
-                    Color4 ec = LerpC(c.color, a.color, pc.y, pa.y, y);
 
-                    ScanLine(sx, ex, y, sz, ez, sc, ec);
+                    ScanLine(sx, ex, y, sz, ez);
                     x_ca -= invslope_ca;
                     x_cb -= invslope_cb;
                 }
@@ -178,10 +179,8 @@ namespace SoftwareRenderer
                     int ex = (int)x_ac;
                     float sz = LerpZ(pa.y, pb.y, y, pa.z, pb.z);
                     float ez = LerpZ(pa.y, pc.y, y, pa.z, pc.z);
-                    Color4 sc = LerpC(a.color, b.color, pa.y, pb.y, y);
-                    Color4 ec = LerpC(a.color, c.color, pa.y, pc.y, y);
 
-                    ScanLine(sx, ex, y, sz, ez, sc, ec);
+                    ScanLine(sx, ex, y, sz, ez);
                     x_ab += invslope_ab;
                     x_ac += invslope_ac;
                 }
@@ -194,26 +193,48 @@ namespace SoftwareRenderer
                     int ex = (int)x_ab;
                     float sz = LerpZ(pa.y, pc.y, y, pa.z, pc.z);
                     float ez = LerpZ(pa.y, pb.y, y, pa.z, pb.z);
-                    Color4 sc = LerpC(a.color, c.color, pa.y, pc.y, y);
-                    Color4 ec = LerpC(a.color, b.color, pa.y, pb.y, y);
 
-                    ScanLine(sx, ex, y, sz, ez, sc, ec);
+                    ScanLine(sx, ex, y, sz, ez);
                     x_ab += invslope_ab;
                     x_ac += invslope_ac;
                 }
             }
         }
 
-        private void ScanLine(int sx, int ex, int y, float sz, float ez, Color4 ca, Color4 cb)
+        private void ScanLine(int sx, int ex, int y, float sz, float ez)
         {
             for (int x = sx; x <= ex; x++)
             {
                 float z = LerpZ(sx, ex, x, sz, ez);
-                Color4 c = LerpC(ca, cb, sx, ex, x);
-                //TODO 还需要完成uv的插值
-                Fragment fragment = new Fragment(x, y, z, c);
+
+                Vector4 pa = _a.position;
+                Vector4 pb = _b.position;
+                Vector4 pc = _c.position;
+                //计算每个像素的重心坐标
+                float t = ((pb.y - pc.y) * x + (pc.x - pb.x) * y + (pb.x * pc.y - pc.x * pb.y)) / ((pb.y - pc.y) * pa.x + (pc.x - pb.x) * pa.y + (pb.x * pc.y - pc.x * pb.y));
+                float s = ((pa.y - pc.y) * x + (pc.x - pa.x) * y + (pa.x * pc.y - pc.x * pa.y)) / ((pa.y - pc.y) * pb.x + (pc.x - pa.x) * pb.y + (pa.x * pc.y - pc.x * pa.y)); 
+                float w = 1 - t - s;
+                //插值color和uv
+                Color4 c = _a.color * t + _b.color * s + _c.color * w;
+                TexCoord uv = _a.uv * t + _b.uv * s + _c.uv * w;
+
+                Fragment fragment = new Fragment(x, y, z, c, uv);
                 _fragments.Add(fragment);
             }
+        }
+
+        protected float LerpZ(float s, float e, float x, float sz, float ez)
+        {
+            if (Mathf.Eq(e, s))
+                return sz;
+
+            sz = Mathf.Inverse(sz);
+            ez = Mathf.Inverse(ez);
+
+            float t = Mathf.Eq(0.0f, e - s) ? 1.0f : (x - s) / (e - s);
+            float z = Mathf.Lerp(sz, ez, t);
+
+            return Mathf.Inverse(z);
         }
     }
 }

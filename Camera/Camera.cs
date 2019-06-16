@@ -42,7 +42,7 @@ namespace SoftwareRenderer
         private Matrix4x4 _worldToCameraMatrix;
         private Matrix4x4 _projectionMatrix;
         private VertexShader _vertexShader = new VertexShader();
-        private Rasterizer _raster = new TriangleStandardRasterizer();
+        private Rasterizer _raster = new TriangleRasterizer();
         private FragmentShader _fragmentShader = new FragmentShader();
         private FrameBuffer _frameBuffer = null;
 
@@ -160,11 +160,11 @@ namespace SoftwareRenderer
 
                     if (_renderType == RenderType.Wireframe)
                     {
-                        _raster = new WireframeBresenhamRasterizer();
+                        _raster = new WireframeRasterizer();
                     }
                     else if (_renderType == RenderType.Color)
                     {
-                        _raster = new TriangleStandardRasterizer();
+                        _raster = new TriangleRasterizer();
                     }
                 }
             }
