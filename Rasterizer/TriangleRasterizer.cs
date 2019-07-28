@@ -228,13 +228,13 @@ namespace SoftwareRenderer
             if (Mathf.Eq(e, s))
                 return sz;
 
-            sz = Mathf.Inverse(sz);
-            ez = Mathf.Inverse(ez);
+            sz = Mathf.Reciprocal(sz);
+            ez = Mathf.Reciprocal(ez);
 
             float t = Mathf.Eq(0.0f, e - s) ? 1.0f : (x - s) / (e - s);
             float z = Mathf.Lerp(sz, ez, t);
 
-            return Mathf.Inverse(z);
+            return Mathf.Reciprocal(z);
         }
     }
 }
