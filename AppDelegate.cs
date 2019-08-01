@@ -12,8 +12,8 @@ namespace SoftwareRenderer
         private Camera _camera = null;
         private float _cameraPosForward = -3;
         private float _fps = 30.0f;
-        private Font _font = new Font("Courier New", 12);
-        private List<Mesh> _meshes = new List<Mesh>();
+        private readonly Font _font = new Font("Courier New", 12);
+        private List<Camera.RenderTarget> _renderTargets = new List<Camera.RenderTarget>();
         private float _meshRotationUp = 0;
 
         private const int WIDTH  = 800;
@@ -38,8 +38,8 @@ namespace SoftwareRenderer
             _camera.fov = 90;
             _camera.LookAt(new Vector4(0.0f, -0.5f, 0.2f), Vector4.up);
 
-            Model model = new Pyramid();
-            _meshes.Add(model.mesh);
+            Model model = new Cube();
+            _renderTargets.Add(new Camera.RenderTarget(model.mesh, model.material));
 
             _form.Show();
             Stopwatch stopwatch = new Stopwatch();
@@ -50,7 +50,7 @@ namespace SoftwareRenderer
 
                 using (var grap = _form.CreateGraphics())
                 {
-                    _camera.Render(grap, _meshes);
+                    _camera.Render(grap, _renderTargets);
                 }
                 Application.DoEvents();
 
@@ -73,16 +73,18 @@ namespace SoftwareRenderer
             if (e.KeyCode == Keys.Left)//左转
             {
                 _meshRotationUp += 0.05f;
-                foreach (Mesh mesh in _meshes)
+                foreach (Camera.RenderTarget target in _renderTargets)
                 {
+                    Mesh mesh = target.mesh;
                     mesh.rotation = new Vector4(0, _meshRotationUp, 0);
                 }
             }
             else if (e.KeyCode == Keys.Right)//右转
             {
                 _meshRotationUp -= 0.05f;
-                foreach (Mesh mesh in _meshes)
+                foreach (Camera.RenderTarget target in _renderTargets)
                 {
+                    Mesh mesh = target.mesh;
                     mesh.rotation = new Vector4(0, _meshRotationUp, 0);
                 }
             }

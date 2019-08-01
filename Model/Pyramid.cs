@@ -5,7 +5,6 @@ namespace SoftwareRenderer
 {
     class Pyramid : Model
     {
-
         public Pyramid()
         {
             List<Vector4> vertics = mesh.vertics;

@@ -2,16 +2,13 @@
 {
     class Model
     {
-        private Mesh _mesh = new Mesh();
-
-        public Mesh mesh 
-        {
-            get { return _mesh; } 
-        }
-
         protected Model()
         {
 
         }
+
+        public Mesh mesh { get; } = new Mesh();
+
+        public Material material { get; } = new Material();
     }
 }

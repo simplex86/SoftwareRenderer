@@ -25,9 +25,22 @@ namespace SoftwareRenderer
             Front,//剔除正面
         }
 
-        private int _width = 800;
-        private int _height = 600;
-        private float _aspect = 1.333f;
+        public class RenderTarget
+        {
+            public Mesh mesh { get; private set; }
+            public Material material { get; private set; }
+
+            public RenderTarget(Mesh mesh, Material material)
+            {
+                this.mesh = mesh;
+                this.material = material;
+            }
+        }
+
+        private readonly int _width = 800;
+        private readonly int _height = 600;
+        private readonly float _aspect = 1.333f;
+
         private Vector4 _position = Vector4.zero;
         private Vector4 _direction = Vector4.forward;
         private Vector4 _up = Vector4.up;
@@ -36,14 +49,11 @@ namespace SoftwareRenderer
         private float _far = 100;
         private CameraType _cameraType = CameraType.Perspective;
         private RenderType _renderType = RenderType.Color;
-        private CullType _cullType = CullType.Back;
         private bool _dirty = false;
         private CanvasBuffer _gbuffer = null;
         private Matrix4x4 _worldToCameraMatrix;
         private Matrix4x4 _projectionMatrix;
-        private VertexShader _vertexShader = new VertexShader();
         private Rasterizer _raster = new TriangleRasterizer();
-        private FragmentShader _fragmentShader = new FragmentShader();
         private FrameBuffer _frameBuffer = null;
 
         public Camera(int width, int height)
@@ -65,14 +75,14 @@ namespace SoftwareRenderer
             _dirty = true;
         }
 
-        public void Render(Graphics grap, List<Mesh> meshes)
+        public void Render(Graphics grap, List<RenderTarget> targets)
         {
             _gbuffer.foreground.Clear(Color4.white);
             BuildMatrix();
 
-            foreach (Mesh mesh in meshes)
+            foreach (RenderTarget target in targets)
             {
-                DrawMesh(mesh);
+                DrawMesh(target);
             }
 
             if (OnPostRender != null)
@@ -144,11 +154,7 @@ namespace SoftwareRenderer
             get { return _cameraType; }
         }
 
-        public CullType cullType
-        {
-            set { _cullType = value; }
-            get { return _cullType; }
-        }
+        public CullType cullType { set; get; } = CullType.Back;
 
         public RenderType renderType 
         { 
@@ -236,10 +242,13 @@ namespace SoftwareRenderer
             return m;
         }
 
-        private void DrawMesh(Mesh mesh)
+        private void DrawMesh(RenderTarget target)
         {
-            if (mesh == null)
+            if (target == null)
                 return;
+
+            Mesh mesh = target.mesh;
+            Material material = target.material;
 
             Matrix4x4 mvp = mesh.modelToWorldMatrix * _worldToCameraMatrix * _projectionMatrix;
             foreach (Triangle t in mesh.triangles)
@@ -256,9 +265,10 @@ namespace SoftwareRenderer
                 }
 
                 //执行vertexShader
-                a = _vertexShader.Do(a, mvp);
-                b = _vertexShader.Do(b, mvp);
-                c = _vertexShader.Do(c, mvp);
+                VertexShader vs = material.shader.vs;
+                a = vs.Do(a, mvp);
+                b = vs.Do(b, mvp);
+                c = vs.Do(c, mvp);
 
                 //裁剪
                 Clip(a, b, c);
@@ -291,15 +301,28 @@ namespace SoftwareRenderer
                 }
                 else if (_renderType == RenderType.Color)
                 {
+                    Texture texture = material.texture;
+                    FragmentShader ps = material.shader.ps;
+
+                    if (texture != null)
+                    {
+                        texture.BeginSample();
+                    }
+
                     foreach (Fragment fragment in fragments)
                     {
-                        Fragment fg = _fragmentShader.Do(fragment);
+                        Fragment fg = ps.Do(fragment, texture);
 
                         if (fg.depth < _frameBuffer.GetDepth(fg.x, fg.y))
                         {
                             _frameBuffer.SetDepth(fg.x, fg.y, fg.depth);
                             _frameBuffer.SetColor(fg.x, fg.y, fg.color);
                         }
+                    }
+
+                    if (texture != null)
+                    {
+                        texture.EndSample();
                     }
                 }
             }
@@ -327,7 +350,7 @@ namespace SoftwareRenderer
 
         private bool CullFaces(Vector4 a, Vector4 b, Vector4 c, Matrix4x4 modelToWorldMatrix)
         {
-            if (_cullType == CullType.None)
+            if (cullType == CullType.None)
                 return false;
 
             a *= modelToWorldMatrix;
@@ -337,8 +360,8 @@ namespace SoftwareRenderer
             Vector4 d = _direction;
             Vector4 n = Vector4.Cross(b - a, c - a);
 
-            return (_cullType == CullType.Back) ? Vector4.Dot(n, d) >= 0.0f
-                                                : Vector4.Dot(n, d) <  0.0f;
+            return (cullType == CullType.Back) ? Vector4.Dot(n, d) >= 0.0f
+                                               : Vector4.Dot(n, d) <  0.0f;
         }
 
         private void Clip(Vertex a, Vertex b, Vertex c)
