@@ -72,6 +72,9 @@
     <Compile Include="Rasterizer\Rasterizer.cs" />
     <Compile Include="Rasterizer\TriangleRasterizer.cs" />
     <Compile Include="Rasterizer\WireframeRasterizer.cs" />
+    <Compile Include="Renderer\IRenderer.cs" />
+    <Compile Include="Renderer\ShadedRenderer.cs" />
+    <Compile Include="Renderer\WireframeRenderer.cs" />
     <Compile Include="Shader\FragmentShader.cs" />
     <Compile Include="Shader\Shader.cs" />
     <Compile Include="Shader\VertexShader.cs" />

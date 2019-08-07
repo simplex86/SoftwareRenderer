@@ -14,8 +14,8 @@ namespace SoftwareRenderer
 
         public enum RenderType
         {
-            Wireframe,//相框
-            Color,    //彩色
+            Wireframe,//线框
+            Shaded,   //着色
         }
 
         public enum CullType
@@ -48,13 +48,14 @@ namespace SoftwareRenderer
         private float _near = 0.1f;
         private float _far = 100;
         private CameraType _cameraType = CameraType.Perspective;
-        private RenderType _renderType = RenderType.Color;
+        private RenderType _renderType = RenderType.Shaded;
         private bool _dirty = false;
         private CanvasBuffer _gbuffer = null;
         private Matrix4x4 _worldToCameraMatrix;
         private Matrix4x4 _projectionMatrix;
         private Rasterizer _raster = new TriangleRasterizer();
         private FrameBuffer _frameBuffer = null;
+        private IRenderer _renderer = new ShadedRenderer();
 
         public Camera(int width, int height)
         {
@@ -167,10 +168,12 @@ namespace SoftwareRenderer
                     if (_renderType == RenderType.Wireframe)
                     {
                         _raster = new WireframeRasterizer();
+                        _renderer = new WireframeRenderer();
                     }
-                    else if (_renderType == RenderType.Color)
+                    else if (_renderType == RenderType.Shaded)
                     {
                         _raster = new TriangleRasterizer();
+                        _renderer = new ShadedRenderer();
                     }
                 }
             }
@@ -292,39 +295,7 @@ namespace SoftwareRenderer
                 List<Fragment> fragments = _raster.Do(a, b, c);
 
                 //修改framebuffer
-                if (_renderType == RenderType.Wireframe)
-                {
-                    foreach (Fragment fragment in fragments)
-                    {
-                        _frameBuffer.SetColor(fragment.x, fragment.y, Color4.black);
-                    }
-                }
-                else if (_renderType == RenderType.Color)
-                {
-                    Texture texture = material.texture;
-                    FragmentShader ps = material.shader.ps;
-
-                    if (texture != null)
-                    {
-                        texture.BeginSample();
-                    }
-
-                    foreach (Fragment fragment in fragments)
-                    {
-                        Fragment fg = ps.Do(fragment, texture);
-
-                        if (fg.depth < _frameBuffer.GetDepth(fg.x, fg.y))
-                        {
-                            _frameBuffer.SetDepth(fg.x, fg.y, fg.depth);
-                            _frameBuffer.SetColor(fg.x, fg.y, fg.color);
-                        }
-                    }
-
-                    if (texture != null)
-                    {
-                        texture.EndSample();
-                    }
-                }
+                _renderer.RenderMesh(material, fragments, _frameBuffer);
             }
 
             //渲染到屏幕

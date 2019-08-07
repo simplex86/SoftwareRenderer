@@ -112,9 +112,9 @@ namespace SoftwareRenderer
             {
                 _camera.renderType = Camera.RenderType.Wireframe;
             }
-            else if (e.KeyCode == Keys.D2)//切换到颜色模式
+            else if (e.KeyCode == Keys.D2)//切换到着色模式
             {
-                _camera.renderType = Camera.RenderType.Color;
+                _camera.renderType = Camera.RenderType.Shaded;
             }
 
             if (e.KeyCode == Keys.D0)//不剔除
@@ -163,9 +163,9 @@ namespace SoftwareRenderer
             {
                 title += "线框渲染";
             }
-            else if (_camera.renderType == Camera.RenderType.Color)
+            else if (_camera.renderType == Camera.RenderType.Shaded)
             {
-                title += "颜色渲染";
+                title += "着色渲染";
             }
 
             _form.Text = title;

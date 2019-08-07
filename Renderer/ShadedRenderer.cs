@@ -1,0 +1,34 @@
+﻿using System.Collections.Generic;
+
+namespace SoftwareRenderer
+{
+    class ShadedRenderer : IRenderer
+    {
+        public void RenderMesh(Material material, List<Fragment> fragments, FrameBuffer buffer)
+        {
+            Texture texture = material.texture;
+            FragmentShader ps = material.shader.ps;
+
+            if (texture != null)
+            {
+                texture.BeginSample();
+            }
+
+            foreach (Fragment fragment in fragments)
+            {
+                Fragment fg = ps.Do(fragment, texture);
+
+                if (fg.depth < buffer.GetDepth(fg.x, fg.y))
+                {
+                    buffer.SetDepth(fg.x, fg.y, fg.depth);
+                    buffer.SetColor(fg.x, fg.y, fg.color);
+                }
+            }
+
+            if (texture != null)
+            {
+                texture.EndSample();
+            }
+        }
+    }
+}
