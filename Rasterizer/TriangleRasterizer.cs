@@ -212,7 +212,7 @@ namespace SoftwareRenderer
                 Vector4 pc = _c.position;
                 //计算每个像素的重心坐标
                 float t = ((pb.y - pc.y) * x + (pc.x - pb.x) * y + (pb.x * pc.y - pc.x * pb.y)) / ((pb.y - pc.y) * pa.x + (pc.x - pb.x) * pa.y + (pb.x * pc.y - pc.x * pb.y));
-                float s = ((pa.y - pc.y) * x + (pc.x - pa.x) * y + (pa.x * pc.y - pc.x * pa.y)) / ((pa.y - pc.y) * pb.x + (pc.x - pa.x) * pb.y + (pa.x * pc.y - pc.x * pa.y)); 
+                float s = ((pa.y - pc.y) * x + (pc.x - pa.x) * y + (pa.x * pc.y - pc.x * pa.y)) / ((pa.y - pc.y) * pb.x + (pc.x - pa.x) * pb.y + (pa.x * pc.y - pc.x * pa.y));
                 float w = 1 - t - s;
                 //插值color和uv
                 Color4 c = _a.color * t + _b.color * s + _c.color * w;

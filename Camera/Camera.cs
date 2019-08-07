@@ -82,13 +82,10 @@ namespace SoftwareRenderer
 
             foreach (RenderTarget target in targets)
             {
-                DrawMesh(target);
+                RenderMesh(target);
             }
 
-            if (OnPostRender != null)
-            {
-                OnPostRender(_gbuffer.foreground);
-            }
+            OnPostRender?.Invoke(_gbuffer.foreground);
 
             _gbuffer.Swap();
             _gbuffer.background.Flush(grap);
@@ -242,7 +239,7 @@ namespace SoftwareRenderer
             return m;
         }
 
-        private void DrawMesh(RenderTarget target)
+        private void RenderMesh(RenderTarget target)
         {
             if (target == null)
                 return;
