@@ -2,9 +2,14 @@
 
 namespace SoftwareRenderer
 {
-    class ShadedRenderer : IRenderer
+    class ShadedRenderer : Renderer
     {
-        public void RenderMesh(Material material, List<Fragment> fragments, FrameBuffer buffer)
+        public ShadedRenderer()
+        {
+            rasterizer = new TriangleRasterizer();
+        }
+
+        public override void RenderMesh(Material material, List<Fragment> fragments, FrameBuffer buffer)
         {
             Texture texture = material.texture;
             FragmentShader ps = material.shader.ps;

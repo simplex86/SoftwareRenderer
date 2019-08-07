@@ -53,9 +53,8 @@ namespace SoftwareRenderer
         private CanvasBuffer _gbuffer = null;
         private Matrix4x4 _worldToCameraMatrix;
         private Matrix4x4 _projectionMatrix;
-        private Rasterizer _raster = new TriangleRasterizer();
         private FrameBuffer _frameBuffer = null;
-        private IRenderer _renderer = new ShadedRenderer();
+        private Renderer _renderer = new ShadedRenderer();
 
         public Camera(int width, int height)
         {
@@ -167,12 +166,10 @@ namespace SoftwareRenderer
 
                     if (_renderType == RenderType.Wireframe)
                     {
-                        _raster = new WireframeRasterizer();
                         _renderer = new WireframeRenderer();
                     }
                     else if (_renderType == RenderType.Shaded)
                     {
-                        _raster = new TriangleRasterizer();
                         _renderer = new ShadedRenderer();
                     }
                 }
@@ -292,7 +289,7 @@ namespace SoftwareRenderer
                 c.position = new Vector4(w * clip3.x + w, h - h * clip3.y, clip3.z);
 
                 //光栅化
-                List<Fragment> fragments = _raster.Do(a, b, c);
+                List<Fragment> fragments = _renderer.rasterizer.Do(a, b, c);
 
                 //修改framebuffer
                 _renderer.RenderMesh(material, fragments, _frameBuffer);

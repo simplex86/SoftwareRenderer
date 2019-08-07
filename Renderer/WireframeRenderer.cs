@@ -2,9 +2,14 @@
 
 namespace SoftwareRenderer
 {
-    class WireframeRenderer : IRenderer
+    class WireframeRenderer : Renderer
     {
-        public void RenderMesh(Material material, List<Fragment> fragments, FrameBuffer buffer)
+        public WireframeRenderer()
+        {
+            rasterizer = new WireframeRasterizer();
+        }
+
+        public override void RenderMesh(Material material, List<Fragment> fragments, FrameBuffer buffer)
         {
             foreach (Fragment fragment in fragments)
             {
