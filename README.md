@@ -7,11 +7,11 @@
 
 ## 效果图
 RENDER_WIREFRAME模式
-![wireframe](https://github.com/xieheng/SoftwareRenderer/blob/master/image_render_wireframe.png)
+![](./Doc/Image/image_render_wireframe.png)
 
 RENDER_COLOR模式
-![color](https://github.com/xieheng/SoftwareRenderer/blob/master/image_render_color.png)
-![texture](https://github.com/xieheng/SoftwareRenderer/blob/master/image_render_texture.png)
+![](./Doc/Image/image_render_color.png)
+![](./Doc/Image/image_render_texture.png)
 
 ## 控制
 方向键左/右：旋转物体。<br>
