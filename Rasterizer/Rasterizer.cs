@@ -6,8 +6,8 @@ namespace SoftwareRenderer
 {
     abstract class Rasterizer
     {
-        protected List<Fragment> _fragments = new List<Fragment>();
+        public List<Fragment> fragments { get; } = new List<Fragment>();
 
-        public abstract List<Fragment> Do(Vertex a, Vertex b, Vertex c);
+        public abstract void Do(Vertex a, Vertex b, Vertex c);
     }
 }

@@ -5,15 +5,13 @@ namespace SoftwareRenderer
 {
     class WireframeRasterizer : Rasterizer
     {
-        public override List<Fragment> Do(Vertex a, Vertex b, Vertex c)
+        public override void Do(Vertex a, Vertex b, Vertex c)
         {
-            _fragments.Clear();
+            fragments.Clear();
 
             ScanLine(a, b);
             ScanLine(b, c);
             ScanLine(c, a);
-
-            return _fragments;
         }
 
         private void ScanLine(Vertex a, Vertex b)
@@ -26,36 +24,29 @@ namespace SoftwareRenderer
             int x2 = (int)pb.x;
             int y2 = (int)pb.y;
 
-            Fragment fragment = null;
-
             if (x1 == x2 && y1 == y2)
             {
-                fragment = new Fragment(x1, y1);
-                _fragments.Add(fragment);
+                fragments.Add(new Fragment(x1, y1));
             }
             else if (x1 == x2)
             {
                 int i = (y1 <= y2) ? 1 : -1;
                 for (int y = y1; y != y2; y += i)
                 {
-                    fragment = new Fragment(x1, y);
-                    _fragments.Add(fragment);
+                    fragments.Add(new Fragment(x1, y));
                 }
 
-                fragment = new Fragment(x2, y2);
-                _fragments.Add(fragment);
+                fragments.Add(new Fragment(x2, y2));
             }
             else if (y1 == y2)
             {
                 int i = (x1 <= x2) ? 1 : -1;
                 for (int x = x1; x != x2; x += i)
                 {
-                    fragment = new Fragment(x, y1);
-                    _fragments.Add(fragment);
+                    fragments.Add(new Fragment(x, y1));
                 }
 
-                fragment = new Fragment(x2, y2);
-                _fragments.Add(fragment);
+                fragments.Add(new Fragment(x2, y2));
             }
             else
             {
@@ -81,8 +72,7 @@ namespace SoftwareRenderer
 
                     for (x = x1, y = y1; x <= x2; x++)
                     {
-                        fragment = new Fragment(x, y);
-                        _fragments.Add(fragment);
+                        fragments.Add(new Fragment(x, y));
 
                         r += dy;
                         if (r >= dx)
@@ -90,13 +80,11 @@ namespace SoftwareRenderer
                             r -= dx;
                             y += (y2 >= y1) ? 1 : -1;
 
-                            fragment = new Fragment(x, y);
-                            _fragments.Add(fragment);
+                            fragments.Add(new Fragment(x, y));
                         }
                     }
 
-                    fragment = new Fragment(x2, y2);
-                    _fragments.Add(fragment);
+                    fragments.Add(new Fragment(x2, y2));
                 }
                 else
                 {
@@ -114,8 +102,7 @@ namespace SoftwareRenderer
 
                     for (x = x1, y = y1; y <= y2; y++)
                     {
-                        fragment = new Fragment(x, y);
-                        _fragments.Add(fragment);
+                        fragments.Add(new Fragment(x, y));
 
                         r += dx;
                         if (r >= dy)
@@ -123,13 +110,11 @@ namespace SoftwareRenderer
                             r -= dy;
                             x += (x2 >= x1) ? 1 : -1;
 
-                            fragment = new Fragment(x, y);
-                            _fragments.Add(fragment);
+                            fragments.Add(new Fragment(x, y));
                         }
                     }
 
-                    fragment = new Fragment(x2, y2);
-                    _fragments.Add(fragment);
+                    fragments.Add(new Fragment(x2, y2));
                 }
             }
         }

@@ -29,9 +29,9 @@ namespace SoftwareRenderer
         private Vertex _b;
         private Vertex _c;
 
-        public override List<Fragment> Do(Vertex a, Vertex b, Vertex c)
+        public override void Do(Vertex a, Vertex b, Vertex c)
         {
-            _fragments.Clear();
+            fragments.Clear();
             Sort(ref a, ref b, ref c);
 
             _a = a;
@@ -61,8 +61,6 @@ namespace SoftwareRenderer
                 RasterizeBottomTriangle(a, b, m);
                 RasterizeTopTriangle(b, m, c);
             }
-
-            return _fragments;
         }
 
         private void Sort(ref Vertex a, ref Vertex b, ref Vertex c)
@@ -129,12 +127,16 @@ namespace SoftwareRenderer
             float x_ca = pc.x;
             float x_cb = pc.x;
 
+            float az = Mathf.Reciprocal(pa.z);
+            float bz = Mathf.Reciprocal(pb.z);
+            float cz = Mathf.Reciprocal(pc.z);
+
             if (invslope_ca > invslope_cb)
             {
                 for (int y = (int)pc.y; y >= (int)pa.y; y--)
                 {
-                    float sz = LerpZ(pc.y, pa.y, y, pc.z, pa.z);
-                    float ez = LerpZ(pc.y, pb.y, y, pc.z, pb.z);
+                    float sz = LerpZ(pc.y, pa.y, y, cz, az);
+                    float ez = LerpZ(pc.y, pb.y, y, cz, bz);
                     int sx = (int)x_ca;
                     int ex = (int)x_cb;
 
@@ -147,8 +149,8 @@ namespace SoftwareRenderer
             {
                 for (int y = (int)pc.y; y >= (int)pa.y; y--)
                 {
-                    float sz = LerpZ(pc.y, pb.y, y, pc.z, pb.z);
-                    float ez = LerpZ(pc.y, pa.y, y, pc.z, pa.z);
+                    float sz = LerpZ(pc.y, pb.y, y, cz, bz);
+                    float ez = LerpZ(pc.y, pa.y, y, cz, az);
                     int sx = (int)x_cb;
                     int ex = (int)x_ca;
 
@@ -171,14 +173,18 @@ namespace SoftwareRenderer
             float x_ab = pa.x;
             float x_ac = pa.x;
 
+            float az = Mathf.Reciprocal(pa.z);
+            float bz = Mathf.Reciprocal(pb.z);
+            float cz = Mathf.Reciprocal(pc.z);
+
             if (invslope_ab < invslope_ac)
             {
                 for (int y = (int)pa.y; y <= (int)pb.y; y++)
                 {
                     int sx = (int)x_ab;
                     int ex = (int)x_ac;
-                    float sz = LerpZ(pa.y, pb.y, y, pa.z, pb.z);
-                    float ez = LerpZ(pa.y, pc.y, y, pa.z, pc.z);
+                    float sz = LerpZ(pa.y, pb.y, y, az, bz);
+                    float ez = LerpZ(pa.y, pc.y, y, az, cz);
 
                     ScanLine(sx, ex, y, sz, ez);
                     x_ab += invslope_ab;
@@ -191,8 +197,9 @@ namespace SoftwareRenderer
                 {
                     int sx = (int)x_ac;
                     int ex = (int)x_ab;
-                    float sz = LerpZ(pa.y, pc.y, y, pa.z, pc.z);
-                    float ez = LerpZ(pa.y, pb.y, y, pa.z, pb.z);
+
+                    float sz = LerpZ(pa.y, pc.y, y, az, cz);
+                    float ez = LerpZ(pa.y, pb.y, y, az, bz);
 
                     ScanLine(sx, ex, y, sz, ez);
                     x_ab += invslope_ab;
@@ -205,7 +212,7 @@ namespace SoftwareRenderer
         {
             for (int x = sx; x <= ex; x++)
             {
-                float z = LerpZ(sx, ex, x, sz, ez);
+                float z = Mathf.Reciprocal(LerpZ(sx, ex, x, sz, ez));
 
                 Vector4 pa = _a.position;
                 Vector4 pb = _b.position;
@@ -219,22 +226,23 @@ namespace SoftwareRenderer
                 TexCoord uv = _a.uv * t + _b.uv * s + _c.uv * w;
 
                 Fragment fragment = new Fragment(x, y, z, c, uv);
-                _fragments.Add(fragment);
+                fragments.Add(fragment);
             }
         }
 
         protected float LerpZ(float s, float e, float x, float sz, float ez)
         {
-            if (Mathf.Eq(e, s))
+            float len = e - s;
+
+            if (Mathf.IsZero(len))
                 return sz;
 
-            sz = Mathf.Reciprocal(sz);
-            ez = Mathf.Reciprocal(ez);
+            //sz = Mathf.Reciprocal(sz);
+            //ez = Mathf.Reciprocal(ez);
 
-            float t = Mathf.Eq(0.0f, e - s) ? 1.0f : (x - s) / (e - s);
-            float z = Mathf.Lerp(sz, ez, t);
+            float z = Mathf.Lerp(sz, ez, (x - s) / len);
 
-            return Mathf.Reciprocal(z);
+            return z;// Mathf.Reciprocal(z);
         }
     }
 }

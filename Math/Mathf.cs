@@ -4,7 +4,8 @@ namespace SoftwareRenderer
 {
     class Mathf
     {
-        private static float DEG_TO_RAD = (float)Math.PI / 180.0f;
+        private const float EPSILON = float.Epsilon;
+        private const float DEG_TO_RAD = (float)Math.PI / 180.0f;
 
         public static float Abs(float a)
         {
@@ -38,7 +39,12 @@ namespace SoftwareRenderer
 
         public static bool Eq(float a, float b)
         {
-            return Abs(a - b) <= float.Epsilon;
+            return Abs(a - b) <= EPSILON;
+        }
+
+        public static bool IsZero(float a)
+        {
+            return Eq(a, 0.0f);
         }
 
         public static float Sin(float a)
@@ -82,7 +88,7 @@ namespace SoftwareRenderer
 
         public static float Reciprocal(float a)
         {
-            return Mathf.Eq(a, 0.0f) ? 0.0f : 1.0f / a;
+            return Mathf.IsZero(a) ? 0.0f : 1.0f / a;
         }
     }
 }

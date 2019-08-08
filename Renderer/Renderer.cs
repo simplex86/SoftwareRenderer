@@ -5,7 +5,7 @@ namespace SoftwareRenderer
     abstract class Renderer
     {
         protected Rasterizer _rasterizer = null;
-        protected List<Fragment> _fragments = null;
+        protected List<Fragment> fragments { get { return _rasterizer.fragments; } }
 
         protected Renderer(Rasterizer rasterizer)
         {
@@ -14,7 +14,7 @@ namespace SoftwareRenderer
 
         public void RasterizeMesh(Vertex a, Vertex b, Vertex c)
         {
-            _fragments = _rasterizer.Do(a, b, c);
+            _rasterizer.Do(a, b, c);
         }
 
         public abstract void RenderMesh(Material material, FrameBuffer buffer);

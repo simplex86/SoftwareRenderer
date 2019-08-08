@@ -12,7 +12,7 @@ namespace SoftwareRenderer
 
         public override void RenderMesh(Material material, FrameBuffer buffer)
         {
-            foreach (Fragment fragment in _fragments)
+            foreach (Fragment fragment in fragments)
             {
                 buffer.SetColor(fragment.x, fragment.y, Color4.black);
             }

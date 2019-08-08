@@ -47,7 +47,7 @@ namespace SoftwareRenderer
         public static Vector4 Normalize(Vector4 v)
         {
             float length = v.length;
-            float factor = Mathf.Eq(length, 0.0f) ? 0.0f : 1.0f / length;
+            float factor = Mathf.IsZero(length) ? 0.0f : 1.0f / length;
 
             return new Vector4(v.x * factor,
                               v.y * factor,
@@ -56,7 +56,7 @@ namespace SoftwareRenderer
 
         public void DivW()
         {
-            if (!Mathf.Eq(w, 0.0f))
+            if (!Mathf.IsZero(w))
             {
                 x /= w;
                 y /= w;
@@ -107,7 +107,7 @@ namespace SoftwareRenderer
 
         public static Vector4 operator /(Vector4 v, float factor)
         {
-            if (Mathf.Eq(factor, 0.0f))
+            if (Mathf.IsZero(factor))
             {
                 return Vector4.zero;
             }

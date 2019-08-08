@@ -20,7 +20,7 @@ namespace SoftwareRenderer
                 texture.BeginSample();
             }
 
-            foreach (Fragment fragment in _fragments)
+            foreach (Fragment fragment in fragments)
             {
                 Fragment fg = ps.Do(fragment, texture);
 
