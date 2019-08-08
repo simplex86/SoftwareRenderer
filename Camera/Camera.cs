@@ -50,11 +50,11 @@ namespace SoftwareRenderer
         private CameraType _cameraType = CameraType.Perspective;
         private RenderType _renderType = RenderType.Shaded;
         private bool _dirty = false;
-        private CanvasBuffer _gbuffer = null;
+        private CanvasBuffer _canvasBuffer = null;
         private Matrix4x4 _worldToCameraMatrix;
         private Matrix4x4 _projectionMatrix;
-        private FrameBuffer _frameBuffer = null;
         private Renderer _renderer = new ShadedRenderer();
+        private FrameBuffer _frameBuffer = null;
 
         public Camera(int width, int height)
         {
@@ -62,7 +62,7 @@ namespace SoftwareRenderer
             _height = height;
 
             _aspect = _width / (float)_height;
-            _gbuffer = new CanvasBuffer(_width, _height);
+            _canvasBuffer = new CanvasBuffer(_width, _height);
             _frameBuffer = new FrameBuffer(_width, _height);
 
             _dirty = true;
@@ -77,7 +77,7 @@ namespace SoftwareRenderer
 
         public void Render(Graphics grap, List<RenderTarget> targets)
         {
-            _gbuffer.foreground.Clear(Color4.white);
+            _canvasBuffer.foreground.Clear(Color4.white);
             BuildMatrix();
 
             foreach (RenderTarget target in targets)
@@ -85,10 +85,10 @@ namespace SoftwareRenderer
                 RenderMesh(target);
             }
 
-            OnPostRender?.Invoke(_gbuffer.foreground);
+            OnPostRender?.Invoke(_canvasBuffer.foreground);
 
-            _gbuffer.Swap();
-            _gbuffer.background.Flush(grap);
+            _canvasBuffer.Swap();
+            _canvasBuffer.background.Flush(grap);
         }
 
         public Vector4 position
@@ -286,14 +286,14 @@ namespace SoftwareRenderer
                 c.position = new Vector4(w * clip3.x + w, h - h * clip3.y, clip3.z);
 
                 //光栅化
-                List<Fragment> fragments = _renderer.rasterizer.Do(a, b, c);
+                _renderer.RasterizeMesh(a, b, c);
 
                 //修改framebuffer
-                _renderer.RenderMesh(material, fragments, _frameBuffer);
+                _renderer.RenderMesh(material, _frameBuffer);
             }
 
             //渲染到屏幕
-            _gbuffer.foreground.RenderByFrameBuffer(_frameBuffer);
+            _canvasBuffer.foreground.RenderByFrameBuffer(_frameBuffer);
 
             //清空frameBuffer
             _frameBuffer.Clear();
@@ -301,9 +301,11 @@ namespace SoftwareRenderer
 
         private Vertex GetVertex(Mesh mesh, Triangle.Index idx)
         {
-            Vertex v = new Vertex();
-            v.position = mesh.vertics[idx.vertex];
-            v.color = mesh.colors[idx.color];
+            Vertex v = new Vertex
+            {
+                position = mesh.vertics[idx.vertex],
+                color = mesh.colors[idx.color]
+            };
 
             if (mesh.uvs.Count > 0)
             {

@@ -5,11 +5,12 @@ namespace SoftwareRenderer
     class ShadedRenderer : Renderer
     {
         public ShadedRenderer()
+            : base(new TriangleRasterizer())
         {
-            rasterizer = new TriangleRasterizer();
+            
         }
 
-        public override void RenderMesh(Material material, List<Fragment> fragments, FrameBuffer buffer)
+        public override void RenderMesh(Material material, FrameBuffer buffer)
         {
             Texture texture = material.texture;
             FragmentShader ps = material.shader.ps;
@@ -19,7 +20,7 @@ namespace SoftwareRenderer
                 texture.BeginSample();
             }
 
-            foreach (Fragment fragment in fragments)
+            foreach (Fragment fragment in _fragments)
             {
                 Fragment fg = ps.Do(fragment, texture);
 
