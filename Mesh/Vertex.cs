@@ -7,5 +7,6 @@ namespace SoftwareRenderer
         public Vector4 position { get; set; }
         public Color4 color { get; set; }
         public TexCoord uv { get; set; }
+        public Vector4 normal { get; set; }
     }
 }

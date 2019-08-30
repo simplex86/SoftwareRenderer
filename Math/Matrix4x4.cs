@@ -62,17 +62,17 @@ namespace SoftwareRenderer
         /// <returns></returns>
         public static Matrix4x4 Transpose(Matrix4x4 m)
         {
+            Matrix4x4 t = identity;
+
             for (int i = 0; i < 4; i++)
             {
                 for (int j = i; j < 4; j++)
                 {
-                    float t = m[i, j];
-                    m[i, j] = m[j, i];
-                    m[j, i] = t;
+                    t[i, j] = m[j, i];
                 }
             }
 
-            return m;
+            return t;
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace SoftwareRenderer
         /// <returns></returns>
         public static Matrix4x4 Adjoint(Matrix4x4 m)
         {            
-            Matrix4x4 a = Matrix4x4.identity;
+            Matrix4x4 a = identity;
             float[,] t = new float[3, 3];
 
             for (int i = 0; i < 4; i++)

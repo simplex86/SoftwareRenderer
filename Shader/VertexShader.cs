@@ -10,7 +10,8 @@ namespace SoftwareRenderer
             {
                 position = vertex.position * mvp,
                 color = vertex.color,
-                uv = vertex.uv
+                uv = vertex.uv,
+                normal = vertex.normal * Matrix4x4.Inverse(Matrix4x4.Transpose(mvp)),
             };
 
             return v;
