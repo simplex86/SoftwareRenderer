@@ -10,7 +10,6 @@ namespace SoftwareRenderer
             : this()
         {
             _values = new float[4, 4];
-            int length = (int)Mathf.Min(16, values.Length);
 
             for (int r = 0; r < 4; r++)
             {
@@ -56,6 +55,95 @@ namespace SoftwareRenderer
             get { return _values[r, c]; }
         }
 
+        /// <summary>
+        /// 获取转置矩阵
+        /// </summary>
+        /// <param name="m"></param>
+        /// <returns></returns>
+        public static Matrix4x4 Transpose(Matrix4x4 m)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = i; j < 4; j++)
+                {
+                    float t = m[i, j];
+                    m[i, j] = m[j, i];
+                    m[j, i] = t;
+                }
+            }
+
+            return m;
+        }
+
+        /// <summary>
+        /// 获取伴随矩阵
+        /// </summary>
+        /// <param name="m"></param>
+        /// <returns></returns>
+        public static Matrix4x4 Adjoint(Matrix4x4 m)
+        {            
+            Matrix4x4 a = Matrix4x4.identity;
+            float[,] t = new float[3, 3];
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    for (int k = 0; k < 3; k++)
+                    {
+                        for (int q = 0; q < 3; ++q)
+                        {
+                            int x = k >= i ? k + 1 : k;
+                            int y = q >= j ? q + 1 : q;
+
+                            t[k, q] = m[x, y];
+                        }
+                    }
+                    a[i, j] = (float)System.Math.Pow(-1, (1 + j) + (1 + i)) * Determinate(t, 3);
+                }
+            }
+
+            return Transpose(a);
+        }
+
+        /// <summary>
+        /// 矩阵是否可逆
+        /// </summary>
+        /// <param name="m"></param>
+        /// <returns></returns>
+        public static bool IsInvertibled(Matrix4x4 m)
+        {
+            float d = Determinate(m._values, 4);
+            return d != 0;
+        }
+
+        /// <summary>
+        /// 获取逆矩阵
+        /// </summary>
+        /// <param name="m"></param>
+        /// <returns></returns>
+        public static Matrix4x4 Inverse(Matrix4x4 m)
+        {
+            float d = Determinate(m._values, 4);
+            System.Diagnostics.Debug.Assert(d != 0, "矩阵不可逆");
+
+            Matrix4x4 a = Adjoint(m);//伴随矩阵
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    a[i, j] = a[i, j] / d;
+                }
+            }
+
+            return a;
+        }
+
+        /// <summary>
+        /// 获取平移矩阵
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
         public static Matrix4x4 Translation(Vector4 t)
         {
             float[] values = new[]{ 1,   0,   0,   0,
@@ -66,6 +154,11 @@ namespace SoftwareRenderer
             return new Matrix4x4(values);
         }
 
+        /// <summary>
+        /// 获取旋转矩阵
+        /// </summary>
+        /// <param name="r"></param>
+        /// <returns></returns>
         public static Matrix4x4 Rotation(Vector4 r)
         {
             Matrix4x4 x = RotationX(r.x);
@@ -75,6 +168,11 @@ namespace SoftwareRenderer
             return z * x * y;
         }
 
+        /// <summary>
+        /// 获取绕X轴旋转的矩阵
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <returns></returns>
         public static Matrix4x4 RotationX(float angle)
         {
             float s = Mathf.Sin(angle);
@@ -88,6 +186,11 @@ namespace SoftwareRenderer
             return new Matrix4x4(values);
         }
 
+        /// <summary>
+        /// 获取绕Y轴旋转的矩阵
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <returns></returns>
         public static Matrix4x4 RotationY(float angle)
         {
             float s = Mathf.Sin(angle);
@@ -101,6 +204,11 @@ namespace SoftwareRenderer
             return new Matrix4x4(values);
         }
 
+        /// <summary>
+        /// 获取绕Z轴旋转的矩阵
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <returns></returns>
         public static Matrix4x4 RotationZ(float angle)
         {
             float s = Mathf.Sin(angle);
@@ -114,6 +222,11 @@ namespace SoftwareRenderer
             return new Matrix4x4(values);
         }
 
+        /// <summary>
+        /// 获取缩放矩阵
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public static Matrix4x4 Scale(Vector4 s)
         {
             float[] values = new []{ s.x, 0,   0,   0,
@@ -124,6 +237,9 @@ namespace SoftwareRenderer
             return new Matrix4x4(values);
         }
 
+        /// <summary>
+        /// 0矩阵
+        /// </summary>
         public static Matrix4x4 zero
         {
             get
@@ -135,6 +251,9 @@ namespace SoftwareRenderer
             }
         }
 
+        /// <summary>
+        /// I矩阵
+        /// </summary>
         public static Matrix4x4 identity
         {
             get
@@ -162,6 +281,40 @@ namespace SoftwareRenderer
             }
 
             return str;
+        }
+
+        /// <summary>
+        /// 行列式
+        /// </summary>
+        /// <param name="m"></param>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        private static float Determinate(float[, ] m, int n)
+        {
+            if (n == 1)
+            {
+                return m[0, 0];
+            }
+            
+            float result = 0;
+            float[, ] t = new float[n - 1, n - 1];
+
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < n - 1; j++)
+                {
+                    for (int k = 0; k < n - 1; k++)
+                    {
+                        int x = j + 1;              //原矩阵行
+                        int y = k >= i ? k + 1 : k; //原矩阵列
+                        t[j, k] = m[x, y];
+                    }
+                }
+
+                result += (float)System.Math.Pow(-1, 1 + (1 + i)) * m[0, i] * Determinate(t, n - 1);
+            }
+
+            return result;
         }
     }
 }
