@@ -284,8 +284,8 @@ namespace SoftwareRenderer
                     Color4 c = _a.color * ta + _b.color * tb + _c.color * tc;
                     TexCoord uv = _a.uv * ta + _b.uv * tb + _c.uv * tc;
 
-                    // 使用对象池获取Fragment
-                    Fragment fragment = FragmentPool.Alloc(x, y, z, c, uv);
+                    // 直接创建Fragment实例
+                    Fragment fragment = new Fragment(x, y, z, c, uv);
                 fragments.Add(fragment);
                 }
             }

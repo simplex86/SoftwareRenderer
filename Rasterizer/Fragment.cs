@@ -1,40 +1,37 @@
-﻿namespace SoftwareRenderer
+namespace SoftwareRenderer
 {
-    class Fragment
+    struct Fragment
     {
-        public int x;
-        public int y;
-        public float depth;
-        public Color4 color;
-        public TexCoord uv;
+        public readonly int x;
+        public readonly int y;
+        public readonly float depth;
+        public readonly Color4 color;
+        public readonly TexCoord uv;
 
         public Fragment(int x, int y)
         {
             this.x = x;
             this.y = y;
+            this.depth = 0;
+            this.color = Color4.black;
+            this.uv = new TexCoord();
         }
 
         public Fragment(int x, int y, float depth)
+            : this(x, y)
         {
-            this.x = x;
-            this.y = y;
             this.depth = depth;
         }
 
         public Fragment(int x, int y, float depth, Color4 color)
+            : this(x, y, depth)
         {
-            this.x = x;
-            this.y = y;
-            this.depth = depth;
             this.color = color;
         }
 
         public Fragment(int x, int y, float depth, Color4 color, TexCoord uv)
+            : this(x, y, depth, color)
         {
-            this.x = x;
-            this.y = y;
-            this.depth = depth;
-            this.color = color;
             this.uv = uv;
         }
 

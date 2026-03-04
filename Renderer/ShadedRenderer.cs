@@ -20,10 +20,8 @@ namespace SoftwareRenderer
                 texture.BeginSample();
             }
 
-            List<Fragment> usedFragments = new List<Fragment>();
             foreach (Fragment fragment in fragments)
             {
-                usedFragments.Add(fragment);
                 // 先进行深度测试
                 if (fragment.depth >= buffer.GetDepth(fragment.x, fragment.y))
                 {
@@ -32,7 +30,6 @@ namespace SoftwareRenderer
 
                 // 深度测试通过，进行着色
                 Fragment fg = ps.Do(fragment, texture);
-                usedFragments.Add(fg);
 
                 buffer.SetDepth(fg.x, fg.y, fg.depth);
                 buffer.SetColor(fg.x, fg.y, fg.color);
@@ -41,12 +38,6 @@ namespace SoftwareRenderer
             if (texture != null)
             {
                 texture.EndSample();
-            }
-
-            // 回收Fragment对象
-            foreach (Fragment fragment in usedFragments)
-            {
-                FragmentPool.Release(fragment);
             }
         }
 
@@ -60,10 +51,8 @@ namespace SoftwareRenderer
                 texture.BeginSample();
             }
 
-            List<Fragment> usedFragments = new List<Fragment>();
             foreach (Fragment fragment in fragments)
             {
-                usedFragments.Add(fragment);
                 // 先进行深度测试
                 if (fragment.depth >= buffer.GetDepth(fragment.x, fragment.y))
                 {
@@ -72,7 +61,6 @@ namespace SoftwareRenderer
 
                 // 深度测试通过，进行着色
                 Fragment fg = ps.Do(fragment, texture);
-                usedFragments.Add(fg);
 
                 buffer.SetDepth(fg.x, fg.y, fg.depth);
                 buffer.SetColor(fg.x, fg.y, fg.color);
@@ -81,12 +69,6 @@ namespace SoftwareRenderer
             if (texture != null)
             {
                 texture.EndSample();
-            }
-
-            // 回收Fragment对象
-            foreach (Fragment fragment in usedFragments)
-            {
-                FragmentPool.Release(fragment);
             }
         }
     }

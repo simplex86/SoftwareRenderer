@@ -6,7 +6,7 @@ namespace SoftwareRenderer
     {
         public Fragment Do(Fragment fragment)
         {
-            return FragmentPool.Alloc(fragment);
+            return new Fragment(fragment);
         }
 
         public Fragment Do(Fragment fragment, Texture texture)
@@ -17,7 +17,7 @@ namespace SoftwareRenderer
             }
 
             Color4 color = texture.Sample(fragment.uv);
-            return FragmentPool.Alloc(fragment.x, fragment.y, fragment.depth, color, fragment.uv);
+            return new Fragment(fragment.x, fragment.y, fragment.depth, color, fragment.uv);
         }
     }
 }
