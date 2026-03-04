@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -12,10 +12,31 @@ namespace SoftwareRenderer
 
         public Texture(string filename)
         {
-            string solutionPath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
-            string filePath = Path.Combine(solutionPath, filename);
+            // 尝试直接使用相对路径
+            string filePath = Path.Combine(Environment.CurrentDirectory, filename);
+            if (!File.Exists(filePath))
+            {
+                // 如果相对路径不存在，尝试使用解决方案路径
+                string solutionPath = Directory.GetParent(Environment.CurrentDirectory).Parent?.FullName;
+                if (solutionPath != null)
+                {
+                    filePath = Path.Combine(solutionPath, filename);
+                }
+            }
 
-            _bitmap = new Bitmap(filePath);
+            if (File.Exists(filePath))
+            {
+                _bitmap = new Bitmap(filePath);
+            }
+            else
+            {
+                // 如果文件不存在，使用默认颜色
+                _bitmap = new Bitmap(1, 1);
+                using (Graphics g = Graphics.FromImage(_bitmap))
+                {
+                    g.Clear(Color.Red);
+                }
+            }
         }
 
         public void BeginSample()
@@ -35,14 +56,28 @@ namespace SoftwareRenderer
             byte b = 255;
             byte a = 255;
 
-            int x = (int)(uv.u * _bitmapData.Width);
-            int y = (int)(uv.v * _bitmapData.Height) * _bitmapData.Stride;
+            // 优化纹理坐标计算，确保在有效范围内
+            float u = Mathf.Clamp01(uv.u);
+            float v = Mathf.Clamp01(uv.v);
+
+            // 预计算宽度和高度，避免重复访问属性
+            int width = _bitmapData.Width;
+            int height = _bitmapData.Height;
+            int stride = _bitmapData.Stride;
+
+            // 计算纹理坐标
+            int x = (int)(u * width);
+            int y = (int)(v * height);
+
+            // 确保坐标在有效范围内
+            x = (int)Mathf.Clamp(x, 0, width - 1);
+            y = (int)Mathf.Clamp(y, 0, height - 1);
 
             if (_bitmapData.PixelFormat == PixelFormat.Format24bppRgb)
             {
                 unsafe
                 {
-                    int p = y + (x * 3);
+                    int p = y * stride + (x * 3);
                     byte* ptr = (byte*)_bitmapData.Scan0.ToPointer();
                     r = ptr[p + 2];
                     g = ptr[p + 1];
@@ -53,12 +88,12 @@ namespace SoftwareRenderer
             {
                 unsafe
                 {
-                    int p = y + (x * 4);
+                    int p = y * stride + (x * 4);
                     byte* ptr = (byte*)_bitmapData.Scan0.ToPointer();
-                    r = ptr[p * 4 + 3];
-                    g = ptr[p * 4 + 2];
-                    b = ptr[p * 4 + 1];
-                    a = ptr[p * 4 + 0];
+                    r = ptr[p + 3];
+                    g = ptr[p + 2];
+                    b = ptr[p + 1];
+                    a = ptr[p + 0];
                 }
             }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SoftwareRenderer
 {
@@ -54,15 +54,15 @@ namespace SoftwareRenderer
                               v.z * factor);
         }
 
-        public void DivW()
+        public Vector4 DivW()
         {
-            if (!Mathf.IsZero(w))
+            if (Mathf.IsZero(w))
             {
-                x /= w;
-                y /= w;
-                z /= w;
-                w = 1.0f;
+                return this;
             }
+
+            float invW = 1.0f / w;
+            return new Vector4(x * invW, y * invW, z * invW, 1.0f);
         }
 
         public static Vector4 zero

@@ -1,7 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-
 namespace SoftwareRenderer
 {
     /// <summary>
@@ -31,7 +27,6 @@ namespace SoftwareRenderer
 
         public override void Do(Vertex a, Vertex b, Vertex c)
         {
-            fragments.Clear();
             Sort(ref a, ref b, ref c);
 
             _a = a;
@@ -56,7 +51,10 @@ namespace SoftwareRenderer
                 float y = pb.y;
                 float z = LerpZ(pa.x, pc.x, x, pa.z, pb.z);
 
-                Vertex m = new Vertex { position = new Vector4(x, y, z) };
+                // 计算中间顶点的w分量（线性插值）
+                float w = (pb.y - pa.y) / (pc.y - pa.y) * (pc.w - pa.w) + pa.w;
+
+                Vertex m = new Vertex { position = new Vector4(x, y, z, w) };
 
                 RasterizeBottomTriangle(a, b, m);
                 RasterizeTopTriangle(b, m, c);
@@ -210,23 +208,58 @@ namespace SoftwareRenderer
 
         private void ScanLine(int sx, int ex, int y, float sz, float ez)
         {
+            //for (int x = sx; x <= ex; x++)
+            //{
+            //    float z = Mathf.Reciprocal(LerpZ(sx, ex, x, sz, ez));
+
+            //    Vector4 pa = _a.position;
+            //    Vector4 pb = _b.position;
+            //    Vector4 pc = _c.position;
+            //    //计算每个像素的重心坐标
+            //    float t = ((pb.y - pc.y) * x + (pc.x - pb.x) * y + (pb.x * pc.y - pc.x * pb.y)) / ((pb.y - pc.y) * pa.x + (pc.x - pb.x) * pa.y + (pb.x * pc.y - pc.x * pb.y));
+            //    float s = ((pa.y - pc.y) * x + (pc.x - pa.x) * y + (pa.x * pc.y - pc.x * pa.y)) / ((pa.y - pc.y) * pb.x + (pc.x - pa.x) * pb.y + (pa.x * pc.y - pc.x * pa.y));
+            //    float w = 1 - t - s;
+            //    //插值color和uv
+            //    Color4 c = _a.color * t + _b.color * s + _c.color * w;
+            //    TexCoord uv = _a.uv * t + _b.uv * s + _c.uv * w;
+
+            //    Fragment fragment = new Fragment(x, y, z, c, uv);
+            //    fragments.Add(fragment);
+            //}
+
+            // 预计算一些值，避免在循环中重复计算
+            Vector4 pa = _a.position;
+            Vector4 pb = _b.position;
+            Vector4 pc = _c.position;
+
+            // 预计算分母
+            float denomA = (pb.y - pc.y) * pa.x + (pc.x - pb.x) * pa.y + (pb.x * pc.y - pc.x * pb.y);
+            float denomB = (pa.y - pc.y) * pb.x + (pc.x - pa.x) * pb.y + (pa.x * pc.y - pc.x * pa.y);
+
+            // 只在分母不为零的情况下进行计算
+            if (Mathf.IsZero(denomA) || Mathf.IsZero(denomB))
+                return;
+
             for (int x = sx; x <= ex; x++)
             {
                 float z = Mathf.Reciprocal(LerpZ(sx, ex, x, sz, ez));
 
-                Vector4 pa = _a.position;
-                Vector4 pb = _b.position;
-                Vector4 pc = _c.position;
-                //计算每个像素的重心坐标
-                float t = ((pb.y - pc.y) * x + (pc.x - pb.x) * y + (pb.x * pc.y - pc.x * pb.y)) / ((pb.y - pc.y) * pa.x + (pc.x - pb.x) * pa.y + (pb.x * pc.y - pc.x * pb.y));
-                float s = ((pa.y - pc.y) * x + (pc.x - pa.x) * y + (pa.x * pc.y - pc.x * pa.y)) / ((pa.y - pc.y) * pb.x + (pc.x - pa.x) * pb.y + (pa.x * pc.y - pc.x * pa.y));
+                // 计算重心坐标
+                float t = ((pb.y - pc.y) * x + (pc.x - pb.x) * y + (pb.x * pc.y - pc.x * pb.y)) / denomA;
+                float s = ((pa.y - pc.y) * x + (pc.x - pa.x) * y + (pa.x * pc.y - pc.x * pa.y)) / denomB;
                 float w = 1 - t - s;
-                //插值color和uv
-                Color4 c = _a.color * t + _b.color * s + _c.color * w;
-                TexCoord uv = _a.uv * t + _b.uv * s + _c.uv * w;
 
-                Fragment fragment = new Fragment(x, y, z, c, uv);
+                // 只处理有效的重心坐标
+                if (t >= 0 && s >= 0 && w >= 0)
+                {
+                    // 直接使用重心坐标进行插值（不进行透视校正）
+                    Color4 c = _a.color * t + _b.color * s + _c.color * w;
+                    TexCoord uv = _a.uv * t + _b.uv * s + _c.uv * w;
+
+                    // 使用对象池获取Fragment
+                    Fragment fragment = FragmentPool.Alloc(x, y, z, c, uv);
                 fragments.Add(fragment);
+                }
             }
         }
 

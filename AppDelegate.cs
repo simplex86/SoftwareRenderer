@@ -43,20 +43,19 @@ namespace SoftwareRenderer
             _form.Show();
             Stopwatch stopwatch = new Stopwatch();
 
+            var grap = _form.CreateGraphics();
             while (!_form.IsDisposed)
             {
                 stopwatch.Start();
 
-                using (var grap = _form.CreateGraphics())
-                {
-                    _camera.Render(grap, _renderTargets);
-                }
+                _camera.Render(grap, _renderTargets);
                 Application.DoEvents();
 
                 stopwatch.Stop();
                 _fps = 1000.0f / stopwatch.Elapsed.Milliseconds;
                 stopwatch.Reset();
             }
+            grap.Dispose();
         }
 
         void OnCameraPostRender(Canvas canvas)

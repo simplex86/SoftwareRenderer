@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace SoftwareRenderer
+﻿namespace SoftwareRenderer
 {
     class Fragment
     {

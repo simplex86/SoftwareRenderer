@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Collections.Generic;
 
@@ -80,15 +80,92 @@ namespace SoftwareRenderer
             _canvasBuffer.foreground.Clear(Color4.white);
             BuildMatrix();
 
-            foreach (RenderTarget target in targets)
-            {
-                RenderMesh(target);
-            }
+            // 使用批量渲染
+            RenderMeshBatch(targets);
 
             OnPostRender?.Invoke(_canvasBuffer.foreground);
 
             _canvasBuffer.Swap();
             _canvasBuffer.background.Flush(grap);
+        }
+
+        private void RenderMeshBatch(List<RenderTarget> targets)
+        {
+            // 按材质分组
+            Dictionary<Material, List<Vertex>> materialGroups = new Dictionary<Material, List<Vertex>>();
+
+            foreach (RenderTarget target in targets)
+            {
+                if (target == null)
+                    continue;
+
+                Mesh mesh = target.mesh;
+                Material material = target.material;
+
+                if (!materialGroups.ContainsKey(material))
+                {
+                    materialGroups[material] = new List<Vertex>();
+                }
+
+                Matrix4x4 mvp = mesh.modelToWorldMatrix * _worldToCameraMatrix * _projectionMatrix;
+                foreach (Triangle t in mesh.triangles)
+                {
+                    Vertex a = GetVertex(mesh, t.a);
+                    Vertex b = GetVertex(mesh, t.b);
+                    Vertex c = GetVertex(mesh, t.c);
+
+                    // 剔除面
+                    bool cull = CullFaces(a.position, b.position, c.position, mesh.modelToWorldMatrix);
+                    if (cull)
+                    {
+                        continue;
+                    }
+
+                    // 执行vertexShader
+                    VertexShader vs = material.shader.vs;
+                    a = vs.Do(a, mvp);
+                    b = vs.Do(b, mvp);
+                    c = vs.Do(c, mvp);
+
+                    // 裁剪
+                    Clip(a, b, c);
+
+                    // 透视除法
+                    Vector4 clip1 = a.position.DivW();
+                    Vector4 clip2 = b.position.DivW();
+                    Vector4 clip3 = c.position.DivW();
+
+                    // 屏幕映射
+                    float w = _width * 0.5f;
+                    float h = _height * 0.5f;
+                    a.position = new Vector4(w * clip1.x + w, h - h * clip1.y, clip1.z);
+                    b.position = new Vector4(w * clip2.x + w, h - h * clip2.y, clip2.z);
+                    c.position = new Vector4(w * clip3.x + w, h - h * clip3.y, clip3.z);
+
+                    // 添加到材质组
+                    materialGroups[material].Add(a);
+                    materialGroups[material].Add(b);
+                    materialGroups[material].Add(c);
+                }
+            }
+
+            // 按材质批次处理
+            foreach (var group in materialGroups)
+            {
+                Material material = group.Key;
+                List<Vertex> vertices = group.Value;
+
+                // 批量光栅化
+                _renderer.RasterizeBatch(vertices);
+                // 批量渲染到帧缓冲
+                _renderer.RenderBatch(material, _frameBuffer);
+            }
+
+            // 渲染到屏幕
+            _canvasBuffer.foreground.RenderByFrameBuffer(_frameBuffer);
+
+            // 清空frameBuffer
+            _frameBuffer.Clear();
         }
 
         public Vector4 position
@@ -270,13 +347,10 @@ namespace SoftwareRenderer
                 //裁剪
                 Clip(a, b, c);
 
-                //透视除法
-                Vector4 clip1 = a.position;
-                Vector4 clip2 = b.position;
-                Vector4 clip3 = c.position;
-                clip1.DivW();
-                clip2.DivW();
-                clip3.DivW();
+                // 透视除法
+                Vector4 clip1 = a.position.DivW();
+                Vector4 clip2 = b.position.DivW();
+                Vector4 clip3 = c.position.DivW();
 
                 //屏幕映射
                 float w = _width * 0.5f;
@@ -320,15 +394,26 @@ namespace SoftwareRenderer
             if (cullType == CullType.None)
                 return false;
 
+            // 应用模型到世界矩阵
             a *= modelToWorldMatrix;
             b *= modelToWorldMatrix;
             c *= modelToWorldMatrix;
 
-            Vector4 d = _direction;
-            Vector4 n = Vector4.Cross(b - a, c - a);
+            // 计算三角形重心
+            Vector4 triangleCenter = (a + b + c) / 3.0f;
+            // 计算从相机到三角形重心的向量
+            Vector4 viewDirection = triangleCenter - position;
+            // 计算三角形法向量
+            Vector4 normal = Vector4.Cross(b - a, c - a);
+            // 标准化法向量
+            normal = Vector4.Normalize(normal);
 
-            return (cullType == CullType.Back) ? Vector4.Dot(n, d) >= 0.0f
-                                               : Vector4.Dot(n, d) <  0.0f;
+            // 计算点积
+            float dotProduct = Vector4.Dot(normal, viewDirection);
+
+            // 根据剔除类型判断
+            return (cullType == CullType.Back) ? dotProduct >= 0.0f
+                                               : dotProduct <  0.0f;
         }
 
         private void Clip(Vertex a, Vertex b, Vertex c)

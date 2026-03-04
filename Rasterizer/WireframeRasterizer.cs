@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace SoftwareRenderer
@@ -7,8 +7,6 @@ namespace SoftwareRenderer
     {
         public override void Do(Vertex a, Vertex b, Vertex c)
         {
-            fragments.Clear();
-
             ScanLine(a, b);
             ScanLine(b, c);
             ScanLine(c, a);
@@ -26,27 +24,30 @@ namespace SoftwareRenderer
 
             if (x1 == x2 && y1 == y2)
             {
-                fragments.Add(new Fragment(x1, y1));
+                fragments.Add(FragmentPool.Alloc(x1, y1, 0, Color4.black, new TexCoord()));
+
             }
             else if (x1 == x2)
             {
                 int i = (y1 <= y2) ? 1 : -1;
                 for (int y = y1; y != y2; y += i)
                 {
-                    fragments.Add(new Fragment(x1, y));
+                    fragments.Add(FragmentPool.Alloc(x1, y, 0, Color4.black, new TexCoord()));
                 }
 
-                fragments.Add(new Fragment(x2, y2));
+                fragments.Add(FragmentPool.Alloc(x2, y2, 0, Color4.black, new TexCoord()));
+
             }
             else if (y1 == y2)
             {
                 int i = (x1 <= x2) ? 1 : -1;
                 for (int x = x1; x != x2; x += i)
                 {
-                    fragments.Add(new Fragment(x, y1));
+                    fragments.Add(FragmentPool.Alloc(x, y1, 0, Color4.black, new TexCoord()));
                 }
 
-                fragments.Add(new Fragment(x2, y2));
+                fragments.Add(FragmentPool.Alloc(x2, y2, 0, Color4.black, new TexCoord()));
+
             }
             else
             {
@@ -72,7 +73,7 @@ namespace SoftwareRenderer
 
                     for (x = x1, y = y1; x <= x2; x++)
                     {
-                        fragments.Add(new Fragment(x, y));
+                        fragments.Add(FragmentPool.Alloc(x, y, 0, Color4.black, new TexCoord()));
 
                         r += dy;
                         if (r >= dx)
@@ -80,11 +81,11 @@ namespace SoftwareRenderer
                             r -= dx;
                             y += (y2 >= y1) ? 1 : -1;
 
-                            fragments.Add(new Fragment(x, y));
+                            fragments.Add(FragmentPool.Alloc(x, y, 0, Color4.black, new TexCoord()));
                         }
                     }
 
-                    fragments.Add(new Fragment(x2, y2));
+                    fragments.Add(FragmentPool.Alloc(x2, y2, 0, Color4.black, new TexCoord()));
                 }
                 else
                 {
@@ -102,7 +103,7 @@ namespace SoftwareRenderer
 
                     for (x = x1, y = y1; y <= y2; y++)
                     {
-                        fragments.Add(new Fragment(x, y));
+                        fragments.Add(FragmentPool.Alloc(x, y, 0, Color4.black, new TexCoord()));
 
                         r += dx;
                         if (r >= dy)
@@ -110,11 +111,11 @@ namespace SoftwareRenderer
                             r -= dy;
                             x += (x2 >= x1) ? 1 : -1;
 
-                            fragments.Add(new Fragment(x, y));
+                            fragments.Add(FragmentPool.Alloc(x, y, 0, Color4.black, new TexCoord()));
                         }
                     }
 
-                    fragments.Add(new Fragment(x2, y2));
+                    fragments.Add(FragmentPool.Alloc(x2, y2, 0, Color4.black, new TexCoord()));
                 }
             }
         }

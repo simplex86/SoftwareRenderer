@@ -1,5 +1,3 @@
-﻿using System.Drawing;
-
 namespace SoftwareRenderer
 {
     struct Vertex
