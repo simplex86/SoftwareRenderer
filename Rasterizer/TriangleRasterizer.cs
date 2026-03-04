@@ -27,6 +27,23 @@ namespace SoftwareRenderer
 
         public override void Do(Vertex a, Vertex b, Vertex c)
         {
+            // 获取屏幕尺寸
+            float width = a.normal.x;
+            float height = a.normal.y;
+
+            // 透视除法和屏幕映射
+            Vector4 posA = a.position.DivW();
+            Vector4 posB = b.position.DivW();
+            Vector4 posC = c.position.DivW();
+
+            float w = width * 0.5f;
+            float h = height * 0.5f;
+
+            // 屏幕映射
+            a.position = new Vector4(w * posA.x + w, h - h * posA.y, posA.z, a.position.w);
+            b.position = new Vector4(w * posB.x + w, h - h * posB.y, posB.z, b.position.w);
+            c.position = new Vector4(w * posC.x + w, h - h * posC.y, posC.z, c.position.w);
+
             Sort(ref a, ref b, ref c);
 
             _a = a;
@@ -52,9 +69,9 @@ namespace SoftwareRenderer
                 float z = LerpZ(pa.x, pc.x, x, pa.z, pb.z);
 
                 // 计算中间顶点的w分量（线性插值）
-                float w = (pb.y - pa.y) / (pc.y - pa.y) * (pc.w - pa.w) + pa.w;
+                float cw = (pb.y - pa.y) / (pc.y - pa.y) * (pc.w - pa.w) + pa.w;
 
-                Vertex m = new Vertex { position = new Vector4(x, y, z, w) };
+                Vertex m = new Vertex { position = new Vector4(x, y, z, cw) };
 
                 RasterizeBottomTriangle(a, b, m);
                 RasterizeTopTriangle(b, m, c);
@@ -252,9 +269,20 @@ namespace SoftwareRenderer
                 // 只处理有效的重心坐标
                 if (t >= 0 && s >= 0 && w >= 0)
                 {
-                    // 直接使用重心坐标进行插值（不进行透视校正）
-                    Color4 c = _a.color * t + _b.color * s + _c.color * w;
-                    TexCoord uv = _a.uv * t + _b.uv * s + _c.uv * w;
+                    // 计算透视校正因子
+                    float wa = t / _a.position.w;
+                    float wb = s / _b.position.w;
+                    float wc = w / _c.position.w;
+                    float totalWeight = wa + wb + wc;
+
+                    // 透视校正后的权重
+                    float ta = wa / totalWeight;
+                    float tb = wb / totalWeight;
+                    float tc = wc / totalWeight;
+
+                    // 插值color和uv（使用透视校正）
+                    Color4 c = _a.color * ta + _b.color * tb + _c.color * tc;
+                    TexCoord uv = _a.uv * ta + _b.uv * tb + _c.uv * tc;
 
                     // 使用对象池获取Fragment
                     Fragment fragment = FragmentPool.Alloc(x, y, z, c, uv);

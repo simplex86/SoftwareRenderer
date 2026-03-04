@@ -7,6 +7,23 @@ namespace SoftwareRenderer
     {
         public override void Do(Vertex a, Vertex b, Vertex c)
         {
+            // 获取屏幕尺寸
+            float width = a.normal.x;
+            float height = a.normal.y;
+
+            // 透视除法和屏幕映射
+            Vector4 posA = a.position.DivW();
+            Vector4 posB = b.position.DivW();
+            Vector4 posC = c.position.DivW();
+
+            float w = width * 0.5f;
+            float h = height * 0.5f;
+
+            // 屏幕映射
+            a.position = new Vector4(w * posA.x + w, h - h * posA.y, posA.z, a.position.w);
+            b.position = new Vector4(w * posB.x + w, h - h * posB.y, posB.z, b.position.w);
+            c.position = new Vector4(w * posC.x + w, h - h * posC.y, posC.z, c.position.w);
+
             ScanLine(a, b);
             ScanLine(b, c);
             ScanLine(c, a);

@@ -130,17 +130,10 @@ namespace SoftwareRenderer
                     // 裁剪
                     Clip(a, b, c);
 
-                    // 透视除法
-                    Vector4 clip1 = a.position.DivW();
-                    Vector4 clip2 = b.position.DivW();
-                    Vector4 clip3 = c.position.DivW();
-
-                    // 屏幕映射
-                    float w = _width * 0.5f;
-                    float h = _height * 0.5f;
-                    a.position = new Vector4(w * clip1.x + w, h - h * clip1.y, clip1.z);
-                    b.position = new Vector4(w * clip2.x + w, h - h * clip2.y, clip2.z);
-                    c.position = new Vector4(w * clip3.x + w, h - h * clip3.y, clip3.z);
+                    // 保存屏幕尺寸信息，用于后续的屏幕映射
+                    a.normal = new Vector4(_width, _height, 0, 0);
+                    b.normal = new Vector4(_width, _height, 0, 0);
+                    c.normal = new Vector4(_width, _height, 0, 0);
 
                     // 添加到材质组
                     materialGroups[material].Add(a);
@@ -347,17 +340,10 @@ namespace SoftwareRenderer
                 //裁剪
                 Clip(a, b, c);
 
-                // 透视除法
-                Vector4 clip1 = a.position.DivW();
-                Vector4 clip2 = b.position.DivW();
-                Vector4 clip3 = c.position.DivW();
-
-                //屏幕映射
-                float w = _width * 0.5f;
-                float h = _height * 0.5f;
-                a.position = new Vector4(w * clip1.x + w, h - h * clip1.y, clip1.z);
-                b.position = new Vector4(w * clip2.x + w, h - h * clip2.y, clip2.z);
-                c.position = new Vector4(w * clip3.x + w, h - h * clip3.y, clip3.z);
+                // 保存屏幕尺寸信息，用于后续的屏幕映射
+                a.normal = new Vector4(_width, _height, 0, 0);
+                b.normal = new Vector4(_width, _height, 0, 0);
+                c.normal = new Vector4(_width, _height, 0, 0);
 
                 //光栅化
                 _renderer.RasterizeMesh(a, b, c);
